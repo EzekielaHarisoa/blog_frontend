@@ -1,17 +1,16 @@
 import { useState } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
-import PostForm from "../components/PostForm";
 
 export default function MainLayout() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
 
   function logout() {
     localStorage.removeItem("token");
     navigate("/login");
+    window.location.reload();
   }
 
   return (
@@ -44,9 +43,7 @@ export default function MainLayout() {
             <button onClick={() => navigate("/posts")}>
               Articles
             </button>
-
             
-
             {token && (
               <button
                 onClick={logout}

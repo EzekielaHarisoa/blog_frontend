@@ -9,8 +9,9 @@ export default function PostCard({ post, onEdit, onDelete }) {
   const [openEdit, setOpenEdit] = useState(false);
   const [title, setTitle] = useState(post.title);
   const [content, setContent] = useState(post.content);
-
-  const menuRef = useRef(null);
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(atob(token.split(".")[1]));
+  const currentUserId = user.id;  const menuRef = useRef(null);
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -84,7 +85,7 @@ export default function PostCard({ post, onEdit, onDelete }) {
               ⋮
             </button>
 
-            {menuOpen && (
+            { token && menuOpen && (
               <div className="absolute right-0 top-10 w-40 bg-white border rounded-xl shadow-lg overflow-hidden z-10">
 
                 <button

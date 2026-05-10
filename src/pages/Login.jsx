@@ -27,8 +27,10 @@ export default function Login() {
       localStorage.setItem("token", data.token);
 
       navigate("/posts");
+      window.location.reload();
     } catch (err) {
       setError("Email ou mot de passe incorrect");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -77,6 +79,9 @@ export default function Login() {
           </button>
 
         </form>
+        <button onClick={()=>navigate("/register")} className="mt-4 text-sm text-blue-500 hover:underline">
+          S'incrire
+        </button>
       </div>
     </div>
   );

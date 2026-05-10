@@ -10,7 +10,6 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* Layout */}
         <Route path="/" element={<MainLayout />}>
 
