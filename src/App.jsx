@@ -1,34 +1,46 @@
-import './App.css'
-import Posts from './pages/Posts'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import { BrowserRouter, Navigate , Routes , Route} from 'react-router-dom';
-import MainLayout from './layouts/MainLayout';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import MainLayout from "./layouts/MainLayout";
+import Posts from "./pages/Posts";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
 function App() {
   const token = localStorage.getItem("token");
-  console.log("voicie mon token",token);
-  
-  
+
   return (
-    
-      <BrowserRouter>
-         <Routes>
-            {/**Dans le main */}
-            <Route path='/' element={<MainLayout/>}>
+    <BrowserRouter>
+      <Routes>
 
-               <Route path = "/posts" element ={token ? <Posts /> : <Navigate to="/login" />}/>
+        {/* Layout */}
+        <Route path="/" element={<MainLayout />}>
 
-            </Route>
+          <Route
+            path="posts"
+            element={token ? <Posts /> : <Navigate to="/login" />}
+          />
 
-            {/**hors le main */}
-            <Route path = "/register" element ={!token ? <Register /> : <Navigate to="/posts" />}/>
-            <Route path = "/login" element ={!token ? <Login /> : <Navigate to="/posts" />}/>
-            <Route path="*" element={<Navigate to={token ? "/posts" : "/login"} />} />   
-        
-         </Routes>
-      </BrowserRouter>
-  
-  )
+        </Route>
+
+        {/* Auth pages */}
+        <Route
+          path="/login"
+          element={!token ? <Login /> : <Navigate to="/posts" />}
+        />
+
+        <Route
+          path="/register"
+          element={!token ? <Register /> : <Navigate to="/posts" />}
+        />
+
+        {/* fallback */}
+        <Route
+          path="*"
+          element={<Navigate to={token ? "/posts" : "/login"} />}
+        />
+
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

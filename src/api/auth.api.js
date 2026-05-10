@@ -18,23 +18,23 @@ export async function login(data){
     }
     return result;
 }
+export async function register(data) {
+  const response = await fetch(`${BASE_URL}/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
-export async function register(data){
-    const response = await fetch(`${BASE_URL}/register`,{
-        method : "POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body: JSON.stringify(data)
-    })
-    console.log("status :" + result.status)
-    
-    const result = await response.json()
+  console.log("status =", response.status);
 
-    console.log("result :", result)
+  const result = await response.json();
+  console.log("result =", result);
 
-    if(!response.ok){
-        throw new Error("Inscription error");
-    }
-    return result;
+  if (!response.ok) {
+    throw new Error(result.message || "Inscription error");
+  }
+
+  return result;
 }
