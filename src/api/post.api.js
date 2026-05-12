@@ -25,6 +25,9 @@ export async function getPosts(page = 1, limit = 5) {
 //create post
 export async function createPost(data){
   const token= getToken();
+  if(!token){
+    throw new Error("No token found");
+  }
   const response = await fetch(`${BASE_URL}`,{
     method:"POST",
     headers:{

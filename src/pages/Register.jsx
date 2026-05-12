@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { register } from "../api/auth.api";
+import { register ,login} from "../api/auth.api";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
@@ -10,30 +10,37 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate()
+
+  //register 
   async function handleRegister(e) {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (!name || !email || !password) {
-      setError("Tous les champs sont obligatoires");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const data = await register({ name, email, password });
-
-      localStorage.setItem("token", data.token);
-
-      alert("Inscription réussie");
-      window.location.reload();
-    } catch (err) {
-      setError("Erreur lors de l'inscription");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  if (!name || !email || !password) {
+    setError("Tous les champs sont obligatoires");
+    return;
   }
+
+  try {
+    setLoading(true);
+
+    await register({ name, email, password });
+
+    const loginRes = await login({ email, password });
+
+    localStorage.setItem("token", loginRes.token);
+
+    alert("Inscription réussie");
+
+    window.location.reload();
+
+  } catch (err) {
+    setError(err.message || "Erreur lors de l'inscription");
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
