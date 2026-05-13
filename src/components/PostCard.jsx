@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { deletePost, editPost } from "../api/post.api";
 import Comments from "./Comments";
+import { MessageCircle } from "lucide-react";
+import { Heart } from "lucide-react";
 
 export default function PostCard({ post, onEdit, onDelete }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -249,7 +251,7 @@ export default function PostCard({ post, onEdit, onDelete }) {
                 : "text-slate-400 hover:text-red-400"
             }`}
           >
-            {liked ? "❤️" : "🤍"} {likeCount}
+            {liked ? <Heart size={16}/> : <Heart  size={16}/>} {likeCount}
           </button>
 
           {/* COMMENTS */}
@@ -257,15 +259,17 @@ export default function PostCard({ post, onEdit, onDelete }) {
              onClick={() => setShowComments((prev) => !prev)}
              className="text-xs text-slate-400 hover:text-slate-600"
           >
-                💬 {post.comments ?? 0}
+                <MessageCircle  size={16}/> {post.comments ?? 0}
           </button>
 
         </div>
-          {showComments && (
-  <div className="mt-3 border-t pt-3">
-    <Comments postId={post.id} />
-  </div>
-)}
+        
+        {/**Comments */}
+        {showComments && (
+            <div className="mt-3 border-t pt-3">
+               <Comments postId={post.id} />
+            </div>
+         )}
       </div>
 
       {/* EDIT MODAL */}

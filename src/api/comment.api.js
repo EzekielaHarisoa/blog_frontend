@@ -1,23 +1,39 @@
+const BASE_URL = "http://localhost:3000/api/comments";
+//get
 export async function getComments(postId) {
-  const res = await fetch(`/posts/${postId}/comments`);
-  return res.json();
+  const res = await fetch(
+    `${BASE_URL}/posts/${postId}/comments`
+  );
+
+  if (!res.ok) {
+    throw new Error("Erreur chargement commentaires");
+  }
+
+  return await res.json();
 }
 
+//creat 
 export async function createComment(postId, data, token) {
-  const res = await fetch(`/posts/${postId}/comments`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${BASE_URL}/posts/${postId}/comments`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
-  return res.json();
+  if (!res.ok) {
+    throw new Error("Erreur création commentaire");
+  }
+
+  return await res.json();
 }
-
 export async function editComment(id, data, token) {
-  const res = await fetch(`/comments/${id}`, {
+  const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -26,14 +42,24 @@ export async function editComment(id, data, token) {
     body: JSON.stringify(data),
   });
 
-  return res.json();
-}
+  if (!res.ok) {
+    throw new Error("Erreur modification commentaire");
+  }
 
+  return await res.json();
+}
+//delete
 export async function deleteComment(id, token) {
-  await fetch(`/comments/${id}`, {
+  const res = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+
+  if (!res.ok) {
+    throw new Error("Erreur suppression commentaire");
+  }
+
+  return await res.json();
 }
