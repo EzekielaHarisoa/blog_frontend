@@ -10,9 +10,17 @@ export  function getToken(){
 
 //get post
 export async function getPosts(page = 1, limit = 5) {
-  
+  const token = getToken();
+
   const response = await fetch(
-    `${BASE_URL}?page=${page}&limit=${limit}`
+    `${BASE_URL}?page=${page}&limit=${limit}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
   );
 
   if (!response.ok) {

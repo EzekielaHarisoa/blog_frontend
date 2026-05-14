@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { deletePost, editPost } from "../api/post.api";
 import Comments from "./Comments";
-import { MessageCircle } from "lucide-react";
-import { Heart } from "lucide-react";
+import { MessageCircle,Heart } from "lucide-react";
+import { likePost } from "../api/like.api";
 
 export default function PostCard({ post, onEdit, onDelete }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-
+  const [commentsCount, setCommentsCount] = useState(0);
   const [openEdit, setOpenEdit] = useState(false);
 
   const [title, setTitle] = useState(post.title);
@@ -19,7 +19,7 @@ export default function PostCard({ post, onEdit, onDelete }) {
   const [success, setSuccess] = useState("");
 
   const [loading, setLoading] = useState(false);
-
+   const [posts, setPosts] = useState([]);
   const menuRef = useRef(null);
 
   // TOKEN
@@ -63,17 +63,24 @@ export default function PostCard({ post, onEdit, onDelete }) {
     };
   }, []);
 
-  
-  function handleLike() {
-    setLiked((prevLiked) => {
+useEffect(() => {
+  setLikeCount(Number(post.likes_count || 0));
+  setCommentsCount(Number(post.comments_count || 0));
+  setLiked(post.liked);
+}, [post]);
 
-      setLikeCount((prevCount) =>
-        prevLiked ? prevCount - 1 : prevCount + 1
-      );
+  //like post
+ async function handleLike() {
+  try {
+    const res = await likePost(post.id);
 
-      return !prevLiked;
-    });
+    setLiked(res.liked);
+    setLikeCount(res.likesCount);
+
+  } catch (error) {
+    console.error("Erreur like :", error);
   }
+}
 
   
   const initials = post.author
@@ -115,12 +122,12 @@ export default function PostCard({ post, onEdit, onDelete }) {
       setLoading(false);
     }
   }
-
-  async function handleDelete() {
+  //delete post
+  async function handleDelete(id) {
     setError("");
     setSuccess("");
 
-    if (Number(post.author_id) !== currentUserId) {
+    if (Number(post.user_id) !== currentUserId) {
       setError(
         "Vous n'avez pas la permission de supprimer ce post."
       );
@@ -139,7 +146,49 @@ export default function PostCard({ post, onEdit, onDelete }) {
       await deletePost(post.id);
 
       setSuccess("Post supprimé avec succès.");
+      
+      setPosts((prev) => prev.filter((post) => post.id !== id));
+      window.location.reload();
+      onDelete?.();
 
+    } catch (err) {
+
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Erreur lors de la suppression.");
+      }
+
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete(id) {
+    setError("");
+    setSuccess("");
+
+    if (Number(post.user_id) !== currentUserId) {
+      setError(
+        "Vous n'avez pas la permission de supprimer ce post."
+      );
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      "Êtes-vous sûr de vouloir supprimer ce post ?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      setLoading(true);
+
+      await deletePost(post.id);
+
+      setSuccess("Post supprimé avec succès.");
+      
+      setPosts((prev) => prev.filter((post) => post.id !== id));
       onDelete?.();
 
     } catch (err) {
@@ -215,9 +264,10 @@ export default function PostCard({ post, onEdit, onDelete }) {
 
           <button
             onClick={() => {
-              handleDelete();
+              handleDelete(post.id);
               setMenuOpen(false);
             }}
+            post={post}
             className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50"
           >
             Supprimer
@@ -247,8 +297,8 @@ export default function PostCard({ post, onEdit, onDelete }) {
             onClick={handleLike}
             className={`flex items-center gap-1 text-sm ${
               liked
-                ? "text-red-500"
-                : "text-slate-400 hover:text-red-400"
+                ? "text-slate-400"
+                : "text-slate-400 "
             }`}
           >
             {liked ? <Heart size={16}/> : <Heart  size={16}/>} {likeCount}
@@ -259,7 +309,7 @@ export default function PostCard({ post, onEdit, onDelete }) {
              onClick={() => setShowComments((prev) => !prev)}
              className="text-xs text-slate-400 hover:text-slate-600"
           >
-                <MessageCircle  size={16}/> {post.comments ?? 0}
+                <MessageCircle  size={16}/> {commentsCount}
           </button>
 
         </div>
