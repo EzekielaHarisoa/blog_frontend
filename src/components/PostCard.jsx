@@ -3,6 +3,7 @@ import { deletePost, editPost } from "../api/post.api";
 import Comments from "./Comments";
 import { MessageCircle,Heart } from "lucide-react";
 import { likePost } from "../api/like.api";
+import useAuthStore from "../store/authstore";
 
 export default function PostCard({ post, onEdit, onDelete }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -23,7 +24,7 @@ export default function PostCard({ post, onEdit, onDelete }) {
   const menuRef = useRef(null);
 
   // TOKEN
-  const token = localStorage.getItem("token");
+  const token = useAuthStore((state) => state.token);
 
   let currentUserId = null;
 

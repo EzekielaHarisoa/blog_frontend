@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createPost } from "../api/post.api";
+import useAuthStore from "../store/authstore";
 
 export default function PostForm({ onCreated }) {
   const [title, setTitle] = useState("");
@@ -11,7 +12,7 @@ export default function PostForm({ onCreated }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const token = localStorage.getItem("token");
+  const token = useAuthStore((state) => state.token);
 
   if (!token) {
     return (

@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ProtectionRoute from "./components/ProtectionRoute";
 import PublicRoute from "./components/PublicRoute";
+import Profile from "./pages/Profile";
 
 function App() {
 
@@ -41,6 +42,15 @@ function App() {
             <PublicRoute>
               <Register />
             </PublicRoute>
+          }
+        />
+        {/**profil page */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectionRoute>
+              <Profile />
+            </ProtectionRoute>
           }
         />
 

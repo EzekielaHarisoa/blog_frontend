@@ -5,6 +5,7 @@ import {
   deleteComment,
   editComment,
 } from "../api/comment.api";
+import useAuthStore from "../store/authstore";
 
 export default function Comments({ postId }) {
   const [comments, setComments] = useState([]);
@@ -12,8 +13,10 @@ export default function Comments({ postId }) {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const token = localStorage.getItem("token");
+  const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
 
   // LOAD COMMENTS
   useEffect(() => {
@@ -23,8 +26,6 @@ export default function Comments({ postId }) {
   async function loadComments() {
     try {
       const res = await getComments(postId);
-
-      // IMPORTANT : adapte selon backend
       const data = res.data || res || [];
 
       setComments(Array.isArray(data) ? data : []);
@@ -35,58 +36,70 @@ export default function Comments({ postId }) {
     }
   }
 
-  // CREATE COMMENT
+  // CREATE
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!content.trim()) return;
+    if (!content.trim() || !token) return;
 
     try {
+      setLoading(true);
+      setError("");
+
       const newComment = await createComment(
         postId,
         { content },
         token
       );
 
-      // reload propre (évite bugs backend response)
-      await loadComments();
-
+      // optimistic update
+      setComments((prev) => [...prev, newComment]);
       setContent("");
     } catch (err) {
       console.error(err);
       setError("Erreur création commentaire");
+    } finally {
+      setLoading(false);
     }
   }
 
-  // DELETE
+  // DELETE 
   async function handleDelete(id) {
     try {
       await deleteComment(id, token);
       setComments((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
       console.error(err);
+      setError("Erreur suppression commentaire");
     }
   }
 
-  // EDIT
+  // START EDIT
   function startEdit(comment) {
     setEditingId(comment.id);
     setEditValue(comment.content);
   }
 
+  // SAVE EDIT
   async function saveEdit(id) {
+    if (!editValue.trim()) return;
+
     try {
-      const updated = await editComment(
-        id,
-        { content: editValue },
-        token
+      //  update
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === id ? { ...c, content: editValue } : c
+        )
       );
 
-      await loadComments();
+      await editComment(id, { content: editValue }, token);
+
       setEditingId(null);
       setEditValue("");
     } catch (err) {
       console.error(err);
+      setError("Erreur modification commentaire");
+      loadComments(); 
     }
   }
 
@@ -99,72 +112,111 @@ export default function Comments({ postId }) {
       )}
 
       {/* FORM */}
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Écrire un commentaire..."
-          className="flex-1 rounded border p-2 text-sm"
-        />
-        <button className="bg-black text-white px-3 rounded text-sm">
-          Envoyer
-        </button>
-      </form>
+      {token && (
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Écrire un commentaire..."
+            className="flex-1 rounded border p-2 text-sm"
+          />
+
+          <button
+            disabled={loading}
+            className="bg-black text-white px-3 rounded text-sm disabled:opacity-50"
+          >
+            {loading ? "..." : "Envoyer"}
+          </button>
+        </form>
+      )}
 
       {/* LIST */}
       <div className="mt-3 space-y-2">
-        {comments.map((c) => (
-          <div
-            key={c.id}
-            className="flex justify-between items-center bg-slate-50 p-2 rounded"
-          >
-            <div className="flex-1">
-              {editingId === c.id ? (
-                <input
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  className="w-full border p-1 text-sm"
-                />
-              ) : (
-                <p className="text-sm">{c.content}</p>
-              )}
-            </div>
+        
+        {comments.map((c) => {
+          const isOwner =
+            token && user &&  Number(user.id) === Number(c.user_id);
 
-            <div className="flex gap-2 text-xs">
-              {editingId === c.id ? (
-                <>
-                  <button
-                    onClick={() => saveEdit(c.id)}
-                    className="text-green-600"
-                  >
-                    save
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="text-gray-500"
-                  >
-                    cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => startEdit(c)}
-                    className="text-blue-500"
-                  >
-                    edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(c.id)}
-                    className="text-red-500"
-                  >
-                    delete
-                  </button>
-                </>
-              )}
+          const isEditing = editingId === c.id;
+
+          return (
+            <div
+              key={c.id}
+              className="flex justify-between items-center bg-slate-50 p-2 rounded"
+            >
+              {/* CONTENT */}
+             <div className="flex-1">
+
+             {/* AUTHOR */}
+                <div className="flex items-center gap-2 mb-1">
+
+                  <span className="w-6 h-6 rounded-full bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center text-white text-xs font-bold">
+                    {c.name?.charAt(0).toUpperCase()}
+                  </span>
+
+                 <p className="text-xs font-semibold text-gray-800">
+                    {c.name}
+                  </p>
+                  </div>
+
+              {/* COMMENT CONTENT */}
+                  {isEditing ? (
+                   <input
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      className="w-full rounded-md border border-gray-300 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                   ) : (
+                   <p className="text-sm text-gray-700 leading-relaxed ml-8">
+                       {c.content}
+                   </p>
+                   )}
+
+</div>
+
+              {/* ACTIONS */}
+              <div className="flex gap-2 text-xs">
+
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={() => saveEdit(c.id)}
+                      className="text-green-600"
+                    >
+                      save
+                    </button>
+
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="text-gray-500"
+                    >
+                      cancel
+                    </button>
+                  </>
+                ) : (
+                  isOwner && (
+                    <>
+                      <button
+                        onClick={() => startEdit(c)}
+                        className="text-blue-500"
+                      >
+                        edit
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(c.id)}
+                        className="text-red-500"
+                      >
+                        delete
+                      </button>
+                    </>
+                  )
+                )}
+
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -43,6 +43,7 @@ export default function MainLayout() {
           <nav className="flex items-center gap-4 text-sm">
 
             <Link to ="/posts">Posts </Link>
+            <Link to="/profile"> Profile</Link> 
             
             {token && (
               <button
