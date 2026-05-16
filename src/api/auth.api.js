@@ -1,5 +1,5 @@
 const BASE_URL = "http://localhost:3000/api/auth";
-export async function login(data){
+export async function loginApi(data){
     const response = await fetch(`${BASE_URL}/login`,{
         method:"POST",
         headers:{

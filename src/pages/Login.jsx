@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { login } from "../api/auth.api";
+import { loginApi } from "../api/auth.api";
 import { useNavigate } from "react-router-dom";
+import useAuthStore from "../store/authstore";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const login = useAuthStore((state)=>state.login);
 
   const navigate = useNavigate();
 
@@ -22,14 +24,12 @@ export default function Login() {
       setLoading(true);
       setError("");
 
-      const data = await login({ email, password });
-
-      localStorage.setItem("token", data.token);
-
+      const data = await loginApi({ email, password });
+      login(data);
       navigate("/posts");
-      window.location.reload();
+
     } catch (err) {
-      setError("Email ou mot de passe incorrect");
+         setError("Email ou mot de passe incorrect");
       console.error(err);
     } finally {
       setLoading(false);

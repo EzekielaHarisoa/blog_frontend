@@ -1,16 +1,18 @@
 import { useState } from "react";
-import { useNavigate, Outlet } from "react-router-dom";
+import { useNavigate, Outlet,Link } from "react-router-dom";
+import useAuthStore from "../store/authstore";
 
 export default function MainLayout() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
 
   const [query, setQuery] = useState("");
+  const token  = useAuthStore((state)=>state.token);
+  const user  = useAuthStore((state)=>state.user);
+  const logout = useAuthStore((state)=>state.logout);
 
-  function logout() {
-    localStorage.removeItem("token");
-    navigate("/login");
-    window.location.reload();
+  function handleLogout() {
+    logout();
+    navigate("/login",{replace:true});
   }
 
   return (
@@ -25,7 +27,7 @@ export default function MainLayout() {
             onClick={() => navigate("/")}
             className="cursor-pointer text-lg font-semibold"
           >
-            Mon Blog
+            DarkFace
           </h1>
 
           {/* SEARCH */}
@@ -40,13 +42,11 @@ export default function MainLayout() {
           {/* NAV */}
           <nav className="flex items-center gap-4 text-sm">
 
-            <button onClick={() => navigate("/posts")}>
-              Articles
-            </button>
+            <Link to ="/posts">Posts </Link>
             
             {token && (
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="text-red-500"
               >
                 Logout
@@ -60,6 +60,8 @@ export default function MainLayout() {
 
       {/* MAIN */}
       <main className="mx-auto max-w-2xl px-6 py-10">
+         {user && <span className="text-xl  font-semibold "> Bienvenue {user.name}</span>} <br /> <br />
+
         <Outlet context={{ query }} />
       </main>
 

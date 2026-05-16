@@ -1,11 +1,12 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route} from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import Posts from "./pages/Posts";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ProtectionRoute from "./components/ProtectionRoute";
+import PublicRoute from "./components/PublicRoute";
 
 function App() {
-  const token = localStorage.getItem("token");
 
   return (
     <BrowserRouter>
@@ -15,7 +16,11 @@ function App() {
 
           <Route
             path="posts"
-            element={token ? <Posts /> : <Navigate to="/login" />}
+            element={
+              <ProtectionRoute>
+                <Posts />
+              </ProtectionRoute>
+            }
           />
 
         </Route>
@@ -23,18 +28,20 @@ function App() {
         {/* Auth pages */}
         <Route
           path="/login"
-          element={!token ? <Login /> : <Navigate to="/posts" />}
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
         />
 
         <Route
           path="/register"
-          element={!token ? <Register /> : <Navigate to="/posts" />}
-        />
-
-        {/* fallback */}
-        <Route
-          path="*"
-          element={<Navigate to={token ? "/posts" : "/login"} />}
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
         />
 
       </Routes>

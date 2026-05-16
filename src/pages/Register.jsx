@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { register ,login} from "../api/auth.api";
+import { register ,loginApi} from "../api/auth.api";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
@@ -26,7 +26,7 @@ export default function Register() {
 
     await register({ name, email, password });
 
-    const loginRes = await login({ email, password });
+    const loginRes = await loginApi({ email, password });
 
     localStorage.setItem("token", loginRes.token);
 
