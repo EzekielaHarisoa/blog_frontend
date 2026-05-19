@@ -6,6 +6,7 @@ import {
   editComment,
 } from "../api/comment.api";
 import useAuthStore from "../store/authstore";
+import { getAvatarUrl } from "../utils/getAvatarUrl";
 
 export default function Comments({ postId }) {
   const [comments, setComments] = useState([]);
@@ -27,7 +28,6 @@ export default function Comments({ postId }) {
     try {
       const res = await getComments(postId);
       const data = res.data || res || [];
-
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
@@ -36,7 +36,7 @@ export default function Comments({ postId }) {
     }
   }
 
-  // CREATE
+  // CREATE COMMENT
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -51,8 +51,8 @@ export default function Comments({ postId }) {
         { content },
         token
       );
+      console.log("Created comment:", newComment);
 
-      // optimistic update
       setComments((prev) => [...prev, newComment]);
       setContent("");
     } catch (err) {
@@ -63,14 +63,15 @@ export default function Comments({ postId }) {
     }
   }
 
-  // DELETE 
+  // DELETE COMMENT (optimistic)
   async function handleDelete(id) {
     try {
-      await deleteComment(id, token);
       setComments((prev) => prev.filter((c) => c.id !== id));
+      await deleteComment(id, token);
     } catch (err) {
       console.error(err);
       setError("Erreur suppression commentaire");
+      loadComments();
     }
   }
 
@@ -85,7 +86,6 @@ export default function Comments({ postId }) {
     if (!editValue.trim()) return;
 
     try {
-      //  update
       setComments((prev) =>
         prev.map((c) =>
           c.id === id ? { ...c, content: editValue } : c
@@ -99,7 +99,7 @@ export default function Comments({ postId }) {
     } catch (err) {
       console.error(err);
       setError("Erreur modification commentaire");
-      loadComments(); 
+      loadComments();
     }
   }
 
@@ -132,50 +132,62 @@ export default function Comments({ postId }) {
 
       {/* LIST */}
       <div className="mt-3 space-y-2">
-        
         {comments.map((c) => {
           const isOwner =
-            token && user &&  Number(user.id) === Number(c.user_id);
+            token &&
+            user &&
+            Number(user.id) === Number(c.user_id);
 
           const isEditing = editingId === c.id;
+         
+          const avatar = getAvatarUrl(c.avatar);
+          const initial =
+            c.name?.charAt(0)?.toUpperCase() || "?";
 
           return (
             <div
               key={c.id}
-              className="flex justify-between items-center bg-slate-50 p-2 rounded"
+              className="flex justify-between items-start bg-slate-50 p-2 rounded"
             >
               {/* CONTENT */}
-             <div className="flex-1">
+              <div className="flex-1">
 
-             {/* AUTHOR */}
+                {/* AUTHOR */}
                 <div className="flex items-center gap-2 mb-1">
 
-                  <span className="w-6 h-6 rounded-full bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center text-white text-xs font-bold">
-                    {c.name?.charAt(0).toUpperCase()}
-                  </span>
+                  {avatar ? (
+                    <img
+                      src={avatar}
+                      alt="avatar"
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="w-6 h-6 rounded-full bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center text-white text-xs font-bold">
+                      {initial}
+                    </span>
+                  )}
 
-                 <p className="text-xs font-semibold text-gray-800">
+                  <p className="text-xs font-semibold text-gray-800">
                     {c.name}
                   </p>
-                  </div>
+                </div>
 
-              {/* COMMENT CONTENT */}
-                  {isEditing ? (
-                   <input
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      className="w-full rounded-md border border-gray-300 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                    />
-                   ) : (
-                   <p className="text-sm text-gray-700 leading-relaxed ml-8">
-                       {c.content}
-                   </p>
-                   )}
-
-</div>
+                {/* COMMENT TEXT */}
+                {isEditing ? (
+                  <input
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="w-full rounded border p-2 text-sm"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-700 ml-8">
+                    {c.content}
+                  </p>
+                )}
+              </div>
 
               {/* ACTIONS */}
-              <div className="flex gap-2 text-xs">
+              <div className="flex gap-2 text-xs ml-2">
 
                 {isEditing ? (
                   <>
@@ -212,7 +224,6 @@ export default function Comments({ postId }) {
                     </>
                   )
                 )}
-
               </div>
             </div>
           );

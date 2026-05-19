@@ -49,7 +49,6 @@ export default function PostForm({ onCreated }) {
 
     } catch (err) {
 
-      // erreur backend
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else {

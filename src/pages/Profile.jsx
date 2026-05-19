@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getProfile, editProfile, uploadAvatar } from "../api/user.api";
 import useAuthStore from "../store/authstore";
-
+import PostCard from "../components/PostCard";
+import { getPostByUser } from "../api/post.api";
 export default function Profile() {
   const token = useAuthStore((state) => state.token);
   const setUser = useAuthStore((state) => state.setUser);
@@ -14,14 +15,28 @@ export default function Profile() {
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
 
-  const [avatar, setAvatar] = useState(null);
+  const [avatarFile, setAvatarFile] = useState(null);
   const [saving, setSaving] = useState(false);
-
+  const [posts, setPosts] = useState([]);
+  const user = useAuthStore((state) => state.user);
+  const userId = user?.id;
   useEffect(() => {
     loadProfile();
+    loadPosts();
   }, []);
-
-  async function loadProfile() {
+// load profil 
+  async function loadPosts() {
+   
+    try {
+      const data = await getPostByUser(userId);
+      setPosts(data || []);
+    } catch (error) {
+      console.error("Erreur chargement posts :", error);
+      setPosts([]);
+    }
+  
+  }
+    async function loadProfile() {
     try {
       setLoading(true);
       setError("");
@@ -43,19 +58,8 @@ export default function Profile() {
   function handleCancel() {
     setName(profile?.name || "");
     setBio(profile?.bio || "");
+    setAvatarFile(null);
     setEditMode(false);
-  }
-
-  async function handleAvatarUpload(file) {
-    const formData = new FormData();
-    formData.append("avatar", file);
-
-    await uploadAvatar(formData, token);
-    const fresh = await getProfile(token);
-
-    setProfile(fresh);
-    setUser(fresh);
-
   }
 
   async function handleSave() {
@@ -63,18 +67,27 @@ export default function Profile() {
       setSaving(true);
       setError("");
 
+      
       await editProfile({ name, bio }, token);
 
-      const fresh = await getProfile(token);
-
-      setProfile(fresh);
-      setUser(fresh);
      
-      if (!fresh.avatar && profile?.avatar) {
-         fresh.avatar = profile.avatar;
-       }
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append("avatar", avatarFile);
+
+        const updatedUser = await uploadAvatar(formData, token);
+
+        setProfile(updatedUser);
+        setUser(updatedUser);
+      } else {
+        // reload simple profil
+        const fresh = await getProfile(token);
+        setProfile(fresh);
+        setUser(fresh);
+      }
 
       setEditMode(false);
+      setAvatarFile(null);
 
     } catch (err) {
       console.error(err);
@@ -109,12 +122,16 @@ export default function Profile() {
 
           {/* AVATAR */}
           <div className="relative w-20 h-20">
-            
+
             {profile?.avatar ? (
-              <img
-                src={`http://localhost:3000/api${profile.avatar}`}
-                alt="avatar"
-                className="w-20 h-20 rounded-full object-cover"
+             <img
+                src={
+                profile.avatar?.startsWith("http")
+                 ? profile.avatar
+                : `http://localhost:3000${profile.avatar}`
+                  }
+                 alt="avatar"
+                 className="w-20 h-20 rounded-full object-cover"
               />
             ) : (
               <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center text-white text-2xl font-bold">
@@ -126,10 +143,7 @@ export default function Profile() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => {
-                     const file = e.target.files[0];
-                      if (file) handleAvatarUpload(file);
-                 }}
+                onChange={(e) => setAvatarFile(e.target.files[0])}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
             )}
@@ -219,6 +233,10 @@ export default function Profile() {
         </div>
 
       </div>
-    </div>
+     {Array.isArray(posts) &&
+        posts.map((post) => (
+       <PostCard key={post.id} post={post} />
+      ))}
+ </div>
   );
 }

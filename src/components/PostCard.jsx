@@ -4,6 +4,7 @@ import Comments from "./Comments";
 import { MessageCircle,Heart } from "lucide-react";
 import { likePost } from "../api/like.api";
 import useAuthStore from "../store/authstore";
+import { getAvatarUrl } from "../utils/getAvatarUrl";
 
 export default function PostCard({ post, onEdit, onDelete }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -20,21 +21,18 @@ export default function PostCard({ post, onEdit, onDelete }) {
   const [success, setSuccess] = useState("");
 
   const [loading, setLoading] = useState(false);
-   const [posts, setPosts] = useState([]);
   const menuRef = useRef(null);
 
   // TOKEN
   const token = useAuthStore((state) => state.token);
-
+  const user = useAuthStore((state) => state.user);
   let currentUserId = null;
 
   
   if (token) {
    
     try {
-      const user = JSON.parse(atob(token.split(".")[1]));
        
-
       currentUserId = Number(user.id);
 
     } catch (err) {
@@ -87,6 +85,7 @@ useEffect(() => {
   const initials = post.author
     ? post.author.slice(0, 2).toUpperCase()
     : "??";
+  const avatar = post.avatar || getAvatarUrl(post.avatar);  
 
   async function handleSaveEdit() {
     try {
@@ -148,8 +147,6 @@ useEffect(() => {
 
       setSuccess("Post supprimé avec succès.");
       
-      setPosts((prev) => prev.filter((post) => post.id !== id));
-      window.location.reload();
       onDelete?.();
 
     } catch (err) {
@@ -223,9 +220,19 @@ useEffect(() => {
 
         <div className="mb-3 flex items-center gap-3">
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
-            {initials}
-          </div>
+          {
+            avatar ? (
+              <img
+                src={avatar}
+                alt={initials}
+                className="h-10 w-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 text-sm font-medium text-gray-600">
+                {initials}
+              </div>
+            )
+          }
 
           <div>
             <p className="text-sm font-medium text-slate-800">

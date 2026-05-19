@@ -1,3 +1,4 @@
+
 const BASE_URL = "http://localhost:3000/api/posts";
 
 export  function getToken(){
@@ -24,10 +25,33 @@ export async function getPosts(page = 1, limit = 5) {
   );
 
   if (!response.ok) {
-    throw new Error("Erreur API");
+    throw new Error("Erreur API getPosts");
   }
 
   return response.json();
+}
+//get posts by user
+export async function getPostByUser(userId) {
+  const token = getToken();
+
+  const response = await fetch(
+    `${BASE_URL}/user/${userId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  const status = response.status;
+  console.log("status =", status);
+
+  if (!response.ok) {
+    throw new Error("Erreur API getPostByUser");
+  }
+
+  const result = await response.json();
+  return result.data;
 }
 
 //create post
@@ -47,14 +71,14 @@ export async function createPost(data){
   });
 
   if(!response.ok){
-    throw new Error("Erreur API");
+    throw new Error("Erreur API create");
   }
 
   const result = await response.json();
   return result;
 
 }
-
+//delet post
 export async function deletePost(id) {
   const token = getToken();
 
@@ -75,7 +99,7 @@ export async function deletePost(id) {
   return result;
 }
 
-//edition de posts
+//edition posts
 export async function editPost(id, data) {
   const token = getToken();
   const response = await fetch(`${BASE_URL}/${id}`, {
@@ -96,11 +120,12 @@ export async function editPost(id, data) {
 }
 
   
-//chercher un post
+//seach post
 export async function searchPost(query){
   const response = await fetch(`${BASE_URL}/search?query=${query}`);
   if (!response.ok) {
     throw new Error("Erreur API");
   }
   return response.json();
+
 }

@@ -1,14 +1,18 @@
 import axios from "axios";
 
-export function updateAvatar(file, token){
+export async function updateAvatar(file, token) {
     const formData = new FormData();
-    formData.append("avatar",file)
+    formData.append("avatar", file);
 
-    const res = axios.put("http://localhost:3000/api/uploads/profil/avatar",formData, {
-        headers:{
-            Authorization: `Bearer ${token}`,
-            "Content-Type":"multipart/form-data"
+    const res = await axios.put(
+        "http://localhost:3000/api/users/avatar",
+        formData,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
         }
-    })
+    );
+
     return res.data;
 }
