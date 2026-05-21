@@ -35,7 +35,7 @@ export async function getPostByUser(userId) {
   const token = getToken();
   console.log("getPostByUser - userId =", userId);
   const response = await fetch(
-    `${BASE_URL}/user/${userId}`,
+    `${BASE_URL}/userPost/${userId}`,
     {
       method: "GET",
       headers: {

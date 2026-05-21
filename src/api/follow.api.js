@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000/api/follows";
+const BASE_URL = "http://localhost:3000/api/suivi";
 
 function getToken() {
   const token = localStorage.getItem("token");
@@ -11,7 +11,7 @@ export async function followUserApi(userId) {
   try {
     const token = getToken();
     const response = await axios.post(
-      `${BASE_URL}/${userId}/follow`,
+      `${BASE_URL}/follow/${userId}`,
       {}, 
       {
         headers: {

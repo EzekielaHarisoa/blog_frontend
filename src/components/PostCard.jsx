@@ -180,7 +180,7 @@ useEffect(() => {
           </div>
         )}
 
-        <div onClick={() => navigate(`/profile/${post.user_id}`)} 
+        <div 
             className="mb-3 flex items-center gap-3">
 
           {
@@ -188,11 +188,13 @@ useEffect(() => {
                <img
                  src={avatar}
                  alt={initials}
+                 onClick={() => navigate(`/profile/${post.user_id}`)} 
                  className="h-10 w-10 rounded-full object-cover"
                />
              
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 text-sm font-medium text-gray-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 text-sm font-medium text-gray-600"
+                   onClick={() => navigate(`/profile/${post.user_id}`)} >
                 {initials}
               </div>
             )
