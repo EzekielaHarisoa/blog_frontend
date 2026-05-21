@@ -132,7 +132,7 @@ export default function Profile() {
                   }
                  alt="avatar"
                  className="w-20 h-20 rounded-full object-cover"
-              />
+              /> 
             ) : (
               <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center text-white text-2xl font-bold">
                 {profile?.name?.[0]?.toUpperCase() || "U"}
@@ -204,7 +204,7 @@ export default function Profile() {
         {/* ACTIONS */}
         <div className="mt-6 flex gap-2">
 
-          {editMode ? (
+          {user && editMode ? (
             <>
               <button
                 onClick={handleSave}

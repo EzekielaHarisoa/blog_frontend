@@ -5,8 +5,10 @@ import { MessageCircle,Heart } from "lucide-react";
 import { likePost } from "../api/like.api";
 import useAuthStore from "../store/authstore";
 import { getAvatarUrl } from "../utils/getAvatarUrl";
+import { useNavigate } from "react-router-dom";
 
 export default function PostCard({ post, onEdit, onDelete }) {
+  const navigate = useNavigate();  
   const [menuOpen, setMenuOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [liked, setLiked] = useState(false);
