@@ -204,7 +204,7 @@ export default function Profile() {
         {/* ACTIONS */}
         <div className="mt-6 flex gap-2">
 
-          {user && editMode ? (
+          { editMode ? (
             <>
               <button
                 onClick={handleSave}

@@ -12,6 +12,17 @@ export async function getProfile(token) {
 
   return res.data;
 }
+// GET PROFILE other User
+export async function getProfileUser(userId, token){
+  const res = await axios.get(`${BASE_URL}/profile/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+  );
+
+  return res.data;
+} 
 
 // EDIT PROFILE
 export async function editProfile(data, token) {

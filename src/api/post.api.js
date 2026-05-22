@@ -33,7 +33,7 @@ export async function getPosts(page = 1, limit = 5) {
 //get posts by user
 export async function getPostByUser(userId) {
   const token = getToken();
-
+  console.log("getPostByUser - userId =", userId);
   const response = await fetch(
     `${BASE_URL}/user/${userId}`,
     {

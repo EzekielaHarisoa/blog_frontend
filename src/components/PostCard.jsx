@@ -5,7 +5,7 @@ import { MessageCircle,Heart } from "lucide-react";
 import { likePost } from "../api/like.api";
 import useAuthStore from "../store/authstore";
 import { getAvatarUrl } from "../utils/getAvatarUrl";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function PostCard({ post, onEdit, onDelete }) {
   const navigate = useNavigate();  
@@ -31,7 +31,7 @@ export default function PostCard({ post, onEdit, onDelete }) {
   let currentUserId = null;
 
   
-  if (token) {
+  if (token && user) {
    
     try {
        
@@ -41,8 +41,7 @@ export default function PostCard({ post, onEdit, onDelete }) {
       console.error("Token invalide :", err);
     }
   }
-    console.log("author_id :", post.user_id);
-    console.log("currentUserId :", currentUserId);
+  
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -149,55 +148,16 @@ useEffect(() => {
 
       setSuccess("Post supprimé avec succès.");
       
-      onDelete?.();
-
-    } catch (err) {
-
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Erreur lors de la suppression.");
-      }
-
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleDelete(id) {
-    setError("");
-    setSuccess("");
-
-    if (Number(post.user_id) !== currentUserId) {
-      setError(
-        "Vous n'avez pas la permission de supprimer ce post."
-      );
-      return;
-    }
-
-    const confirmDelete = window.confirm(
-      "Êtes-vous sûr de vouloir supprimer ce post ?"
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      setLoading(true);
-
-      await deletePost(post.id);
-
-      setSuccess("Post supprimé avec succès.");
-      
       setPosts((prev) => prev.filter((post) => post.id !== id));
       onDelete?.();
 
     } catch (err) {
 
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Erreur lors de la suppression.");
-      }
+     console.log(err);
+
+     if (err.response?.data?.message) {
+      setError(err.response.data.message);
+     }
 
     } finally {
       setLoading(false);
@@ -220,15 +180,17 @@ useEffect(() => {
           </div>
         )}
 
-        <div className="mb-3 flex items-center gap-3">
+        <div onClick={() => navigate(`/profile/${post.user_id}`)} 
+            className="mb-3 flex items-center gap-3">
 
           {
             avatar ? (
-              <img
-                src={avatar}
-                alt={initials}
-                className="h-10 w-10 rounded-full object-cover"
-              />
+               <img
+                 src={avatar}
+                 alt={initials}
+                 className="h-10 w-10 rounded-full object-cover"
+               />
+             
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 text-sm font-medium text-gray-600">
                 {initials}

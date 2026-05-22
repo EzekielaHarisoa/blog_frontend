@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import ProtectionRoute from "./components/ProtectionRoute";
 import PublicRoute from "./components/PublicRoute";
 import Profile from "./pages/Profile";
+import ProfileUser from "./pages/ProfileUser";
 
 function App() {
 
@@ -42,6 +43,16 @@ function App() {
             <PublicRoute>
               <Register />
             </PublicRoute>
+          }
+        />
+
+        {/**Profile user page */}
+         <Route
+          path="/profile/:id"
+          element={
+            <ProtectionRoute>
+              <ProfileUser />
+            </ProtectionRoute>
           }
         />
         {/**profil page */}
