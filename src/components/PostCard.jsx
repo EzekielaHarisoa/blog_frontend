@@ -1,361 +1,242 @@
 import { useState, useRef, useEffect } from "react";
 import { deletePost, editPost } from "../api/post.api";
 import Comments from "./Comments";
-import { MessageCircle,Heart } from "lucide-react";
+import { MessageCircle, Heart, MoreVertical, Pencil, Trash } from "lucide-react";
 import { likePost } from "../api/like.api";
 import useAuthStore from "../store/authstore";
 import { getAvatarUrl } from "../utils/getAvatarUrl";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function PostCard({ post, onEdit, onDelete }) {
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  const [commentsCount, setCommentsCount] = useState(0);
   const [openEdit, setOpenEdit] = useState(false);
 
   const [title, setTitle] = useState(post.title);
   const [content, setContent] = useState(post.content);
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const menuRef = useRef(null);
 
-  // TOKEN
-  const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
-  let currentUserId = null;
+  const currentUserId = user?.id ? Number(user.id) : null;
 
-  
-  if (token && user) {
-   
-    try {
-       
-      currentUserId = Number(user.id);
+  const isOwner = Number(post.user_id) === currentUserId;
 
-    } catch (err) {
-      console.error("Token invalide :", err);
-    }
-  }
-  
+  const imageUrl = post.image?.startsWith("http") ?
+                   post.image :post.image ?   
+                   `http://localhost:3000${post.image}` : null;
 
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target)
-      ) {
+    setLikeCount(Number(post.likes_count || 0));
+    setLiked(post.liked);
+  }, [post]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
-    }
+    };
 
     document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-useEffect(() => {
-  setLikeCount(Number(post.likes_count || 0));
-  setCommentsCount(Number(post.comments_count || 0));
-  setLiked(post.liked);
-}, [post]);
-
-  //like post
- async function handleLike() {
-  try {
+  async function handleLike() {
     const res = await likePost(post.id);
-
     setLiked(res.liked);
     setLikeCount(res.likesCount);
-
-  } catch (error) {
-    console.error("Erreur like :", error);
   }
-}
-
-  
-  const initials = post.author
-    ? post.author.slice(0, 2).toUpperCase()
-    : "??";
-  const avatar = post.avatar || getAvatarUrl(post.avatar);  
 
   async function handleSaveEdit() {
     try {
-      setError("");
-      setSuccess("");
-
-      if (!title.trim() || !content.trim()) {
-        setError("Tous les champs sont requis.");
-        return;
-      }
-
       setLoading(true);
 
-      await editPost(post.id, {
-        title,
-        content,
-      });
-
-      setSuccess("Post modifié avec succès.");
+      await editPost(post.id, { title, content });
 
       setOpenEdit(false);
-
       onEdit?.();
 
     } catch (err) {
-
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Erreur lors de la modification.");
-      }
-
+      setError("Erreur modification");
     } finally {
       setLoading(false);
     }
   }
-  //delete post
-  async function handleDelete(id) {
-    setError("");
-    setSuccess("");
 
-    if (Number(post.user_id) !== currentUserId) {
-      setError(
-        "Vous n'avez pas la permission de supprimer ce post."
-      );
-      return;
-    }
-
-    const confirmDelete = window.confirm(
-      "Êtes-vous sûr de vouloir supprimer ce post ?"
-    );
-
-    if (!confirmDelete) return;
+  async function handleDelete() {
+    if (!window.confirm("Supprimer ce post ?")) return;
 
     try {
-      setLoading(true);
-
       await deletePost(post.id);
-
-      setSuccess("Post supprimé avec succès.");
-      
-      setPosts((prev) => prev.filter((post) => post.id !== id));
       onDelete?.();
-
     } catch (err) {
-
-     console.log(err);
-
-     if (err.response?.data?.message) {
-      setError(err.response.data.message);
-     }
-
-    } finally {
-      setLoading(false);
+      console.log(err);
     }
   }
 
   return (
     <>
-      <div className="relative rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md">
+      {/* CARD */}
+      <div className="relative rounded-2xl border border-zinc-800 bg-zinc-900 p-5 text-white shadow-lg hover:shadow-xl transition">
 
-        {error && (
-          <div className="mb-3 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-600">
-            {error}
-          </div>
-        )}
+        {/* HEADER */}
+        <div className="flex items-center gap-3">
 
-        {success && (
-          <div className="mb-3 rounded-lg bg-green-100 px-3 py-2 text-sm text-green-600">
-            {success}
-          </div>
-        )}
-
-        <div 
-            className="mb-3 flex items-center gap-3">
-
-          {
-            avatar ? (
-               <img
-                 src={avatar}
-                 alt={initials}
-                 onClick={() => navigate(`/profile/${post.user_id}`)} 
-                 className="h-10 w-10 rounded-full object-cover"
-               />
-             
-            ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 text-sm font-medium text-gray-600"
-                   onClick={() => navigate(`/profile/${post.user_id}`)} >
-                {initials}
-              </div>
-            )
-          }
+          <img
+            src={post.avatar || getAvatarUrl(post.avatar)}
+            onClick={() => navigate(`/profile/${post.user_id}`)}
+            className="h-10 w-10 cursor-pointer rounded-full object-cover border border-zinc-700"
+          /> 
+          
 
           <div>
-            <p className="text-sm font-medium text-slate-800">
-              {post.author || "Anonyme"}
-            </p>
-
-            <p className="text-xs text-slate-400">
+            <p className="font-semibold text-sm">{post.author}</p>
+            <p className="text-xs text-zinc-400">
               {new Date(post.created_at).toLocaleDateString()}
             </p>
           </div>
 
-         {/* MENU */}
-<div className="relative ml-auto" ref={menuRef}>
+          {/* MENU */}
+          {isOwner && (
+            <div ref={menuRef} className="ml-auto relative">
 
-  {Number(post.user_id) === Number(currentUserId) && (
-    <>
-      <button
-        onClick={() => setMenuOpen((prev) => !prev)}
-        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100"
-      >
-        ⋮
-      </button>
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="p-2 rounded-lg hover:bg-zinc-800"
+              >
+                <MoreVertical size={18} />
+              </button>
 
-      {/* DROPDOWN */}
-      {menuOpen && (
-        <div className="absolute right-0 top-10 z-10 w-40 overflow-hidden rounded-xl border bg-white shadow-lg">
+              {menuOpen && (
+                <div className="absolute right-0 top-10 w-44 rounded-xl bg-zinc-800 border border-zinc-700 shadow-2xl z-40 overflow-hidden">
 
-          <button
-            onClick={() => {
-              setOpenEdit(true);
-              setMenuOpen(false);
-            }}
-            className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
-          >
-            Éditer
-          </button>
+                  <button
+                    onClick={() => {
+                      setOpenEdit(true);
+                      setMenuOpen(false);
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-2 hover:bg-zinc-700 text-sm"
+                  >
+                    <Pencil size={14} /> Modifier
+                  </button>
 
-          <button
-            onClick={() => {
-              handleDelete(post.id);
-              setMenuOpen(false);
-            }}
-            post={post}
-            className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50"
-          >
-            Supprimer
-          </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex items-center gap-2 w-full px-4 py-2 hover:bg-red-500/20 text-red-400 text-sm"
+                  >
+                    <Trash size={14} /> Supprimer
+                  </button>
 
-        </div>
-      )}
-    </>
-  )}
-</div>
+                </div>
+              )}
+
+            </div>
+          )}
+
         </div>
 
         {/* CONTENT */}
-        <h3 className="text-base font-semibold text-slate-900">
-          {post.title}
-        </h3>
-
-        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-600">
+        <h3 className="mt-3 text-lg font-bold">{post.title}</h3>
+        <p className="mt-2 text-sm text-zinc-300 line-clamp-3">
           {post.content}
         </p>
+        {imageUrl && (
+         <div className="mt-3 overflow-hidden rounded-xl border border-zinc-800">
+           <img
+               src={imageUrl}
+               alt="post"
+               className="max-h-[400px] w-full object-cover hover:scale-[1.02] transition"
+           />
+         </div>
+         )}
 
-        {/* FOOTER */}
-        <div className="mt-4 flex items-center gap-4 border-t pt-3">
+        {/* ACTIONS */}
+        <div className="mt-4 flex items-center gap-5 border-t border-zinc-800 pt-3">
 
-          {/* LIKE */}
           <button
             onClick={handleLike}
-            className={`flex items-center gap-1 text-sm ${
-              liked
-                ? "text-slate-400"
-                : "text-slate-400 "
-            }`}
+            className="flex items-center gap-2 text-sm text-zinc-300 hover:text-pink-400"
           >
-            {liked ? <Heart size={16}/> : <Heart  size={16}/>} {likeCount}
+            <Heart size={16} className={liked ? "text-pink-500" : ""} />
+            {likeCount}
           </button>
 
-          {/* COMMENTS */}
           <button
-             onClick={() => setShowComments((prev) => !prev)}
-             className="text-xs text-slate-400 hover:text-slate-600"
+            onClick={() => setShowComments(!showComments)}
+            className="flex items-center gap-2 text-sm text-zinc-300 hover:text-blue-400"
           >
-                <MessageCircle  size={16}/> {commentsCount}
+            <MessageCircle size={16} />
+            Comments
           </button>
 
         </div>
-        
-        {/**Comments */}
+
         {showComments && (
-            <div className="mt-3 border-t pt-3">
-               <Comments postId={post.id} />
-            </div>
-         )}
+          <div className="mt-3 border-t border-zinc-800 pt-3">
+            <Comments postId={post.id} />
+          </div>
+        )}
+
       </div>
 
-      {/* EDIT MODAL */}
+      {/* MODAL EDIT  */}
       {openEdit && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
 
-          <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-lg">
+          <div className="w-full max-w-md rounded-2xl bg-zinc-900 border border-zinc-700 p-5 shadow-2xl z-[60]">
 
-            <h2 className="mb-4 text-lg font-semibold">
-              Modifier le post
-            </h2>
+            <h2 className="text-lg font-bold mb-4">Modifier post</h2>
 
-            {/* ERROR */}
             {error && (
-              <div className="mb-3 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-600">
-                {error}
-              </div>
+              <p className="mb-2 text-sm text-red-400">{error}</p>
             )}
 
-            {/* TITLE */}
             <input
-              className="mb-3 w-full rounded-lg border p-2"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Titre..."
+              className="w-full mb-3 p-2 rounded bg-zinc-800 border border-zinc-700"
+              placeholder="Titre"
             />
 
-            {/* CONTENT */}
             <textarea
-              className="mb-4 w-full rounded-lg border p-2"
-              rows={5}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Contenu..."
+              rows={4}
+              className="w-full p-2 rounded bg-zinc-800 border border-zinc-700"
+              placeholder="Contenu"
             />
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 mt-4">
 
               <button
-                disabled={loading}
                 onClick={() => setOpenEdit(false)}
-                className="rounded bg-gray-200 px-3 py-1 disabled:opacity-50"
+                className="px-3 py-1 rounded bg-zinc-700"
               >
                 Annuler
               </button>
 
               <button
-                disabled={loading}
                 onClick={handleSaveEdit}
-                className="rounded bg-black px-3 py-1 text-white disabled:opacity-50"
+                disabled={loading}
+                className="px-3 py-1 rounded bg-pink-600 hover:bg-pink-500"
               >
-                {loading
-                  ? "Sauvegarde..."
-                  : "Sauvegarder"}
+                Save
               </button>
 
             </div>
 
           </div>
+
         </div>
       )}
-    
     </>
   );
 }

@@ -7,6 +7,7 @@ import {
 } from "../api/comment.api";
 import useAuthStore from "../store/authstore";
 import { getAvatarUrl } from "../utils/getAvatarUrl";
+import { Send, Pencil, Trash } from "lucide-react";
 
 export default function Comments({ postId }) {
   const [comments, setComments] = useState([]);
@@ -19,7 +20,6 @@ export default function Comments({ postId }) {
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
 
-  // LOAD COMMENTS
   useEffect(() => {
     loadComments();
   }, [postId]);
@@ -27,207 +27,179 @@ export default function Comments({ postId }) {
   async function loadComments() {
     try {
       const res = await getComments(postId);
-      const data = res.data || res || [];
-      setComments(Array.isArray(data) ? data : []);
+      setComments(res.data || res || []);
     } catch (err) {
-      console.error(err);
       setError("Erreur chargement commentaires");
-      setComments([]);
     }
   }
 
-  // CREATE COMMENT
   async function handleSubmit(e) {
     e.preventDefault();
-
-    if (!content.trim() || !token) return;
+    if (!content.trim()) return;
 
     try {
       setLoading(true);
-      setError("");
 
-      const newComment = await createComment(
-        postId,
-        { content },
-        token
-      );
-      console.log("Created comment:", newComment);
+      const newComment = await createComment(postId, { content }, token);
 
       setComments((prev) => [...prev, newComment]);
       setContent("");
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Erreur création commentaire");
     } finally {
       setLoading(false);
     }
   }
 
-  // DELETE COMMENT (optimistic)
   async function handleDelete(id) {
-    try {
-      setComments((prev) => prev.filter((c) => c.id !== id));
-      await deleteComment(id, token);
-    } catch (err) {
-      console.error(err);
-      setError("Erreur suppression commentaire");
-      loadComments();
-    }
+    setComments((prev) => prev.filter((c) => c.id !== id));
+    await deleteComment(id, token);
   }
 
-  // START EDIT
-  function startEdit(comment) {
-    setEditingId(comment.id);
-    setEditValue(comment.content);
+  function startEdit(c) {
+    setEditingId(c.id);
+    setEditValue(c.content);
   }
 
-  // SAVE EDIT
   async function saveEdit(id) {
     if (!editValue.trim()) return;
 
-    try {
-      setComments((prev) =>
-        prev.map((c) =>
-          c.id === id ? { ...c, content: editValue } : c
-        )
-      );
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, content: editValue } : c
+      )
+    );
 
-      await editComment(id, { content: editValue }, token);
+    await editComment(id, { content: editValue }, token);
 
-      setEditingId(null);
-      setEditValue("");
-    } catch (err) {
-      console.error(err);
-      setError("Erreur modification commentaire");
-      loadComments();
-    }
+    setEditingId(null);
+    setEditValue("");
   }
 
   return (
-    <div className="mt-4 border-t pt-3">
+    <div className="mt-4 border-t border-zinc-800 pt-4">
 
       {/* ERROR */}
       {error && (
-        <p className="text-red-500 text-sm mb-2">{error}</p>
+        <p className="text-red-400 text-sm mb-2">{error}</p>
       )}
 
-      {/* FORM */}
+      {/* INPUT */}
       {token && (
-        <form onSubmit={handleSubmit} className="flex gap-2">
+        <form
+          onSubmit={handleSubmit}
+          className="flex items-center gap-2 mb-4"
+        >
           <input
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Écrire un commentaire..."
-            className="flex-1 rounded border p-2 text-sm"
+            className="flex-1 bg-zinc-900 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-pink-500"
           />
 
           <button
             disabled={loading}
-            className="bg-black text-white px-3 rounded text-sm disabled:opacity-50"
+            className="bg-pink-600 hover:bg-pink-500 transition px-3 py-2 rounded-lg text-white"
           >
-            {loading ? "..." : "Envoyer"}
+            <Send size={16} />
           </button>
         </form>
       )}
 
       {/* LIST */}
-      <div className="mt-3 space-y-2">
+      <div className="space-y-3">
+
         {comments.map((c) => {
           const isOwner =
-            token &&
-            user &&
-            Number(user.id) === Number(c.user_id);
+            user && Number(user.id) === Number(c.user_id);
 
           const isEditing = editingId === c.id;
-         
           const avatar = getAvatarUrl(c.avatar);
-          const initial =
-            c.name?.charAt(0)?.toUpperCase() || "?";
+          const initial = c.name?.[0]?.toUpperCase() || "?";
 
           return (
             <div
               key={c.id}
-              className="flex justify-between items-start bg-slate-50 p-2 rounded"
+              className="flex gap-3 bg-zinc-900 border border-zinc-800 p-3 rounded-xl"
             >
+
+              {/* AVATAR */}
+              {avatar ? (
+                <img
+                  src={avatar}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-bold">
+                  {initial}
+                </div>
+              )}
+
               {/* CONTENT */}
               <div className="flex-1">
 
-                {/* AUTHOR */}
-                <div className="flex items-center gap-2 mb-1">
+                <p className="text-xs text-zinc-400 font-semibold">
+                  {c.name}
+                </p>
 
-                  {avatar ? (
-                    <img
-                      src={avatar}
-                      alt="avatar"
-                      className="w-6 h-6 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="w-6 h-6 rounded-full bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center text-white text-xs font-bold">
-                      {initial}
-                    </span>
-                  )}
-
-                  <p className="text-xs font-semibold text-gray-800">
-                    {c.name}
-                  </p>
-                </div>
-
-                {/* COMMENT TEXT */}
                 {isEditing ? (
                   <input
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
-                    className="w-full rounded border p-2 text-sm"
+                    className="w-full mt-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm text-white"
                   />
                 ) : (
-                  <p className="text-sm text-gray-700 ml-8">
+                  <p className="text-sm text-zinc-200 mt-1">
                     {c.content}
                   </p>
                 )}
               </div>
 
               {/* ACTIONS */}
-              <div className="flex gap-2 text-xs ml-2">
+              {isOwner && (
+                <div className="flex flex-col gap-2 text-xs">
 
-                {isEditing ? (
-                  <>
-                    <button
-                      onClick={() => saveEdit(c.id)}
-                      className="text-green-600"
-                    >
-                      save
-                    </button>
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={() => saveEdit(c.id)}
+                        className="text-green-400"
+                      >
+                        save
+                      </button>
 
-                    <button
-                      onClick={() => setEditingId(null)}
-                      className="text-gray-500"
-                    >
-                      cancel
-                    </button>
-                  </>
-                ) : (
-                  isOwner && (
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="text-zinc-400"
+                      >
+                        cancel
+                      </button>
+                    </>
+                  ) : (
                     <>
                       <button
                         onClick={() => startEdit(c)}
-                        className="text-blue-500"
+                        className="text-blue-400 hover:text-blue-300"
                       >
-                        edit
+                        <Pencil size={14} />
                       </button>
 
                       <button
                         onClick={() => handleDelete(c.id)}
-                        className="text-red-500"
+                        className="text-red-400 hover:text-red-300"
                       >
-                        delete
+                        <Trash size={14} />
                       </button>
                     </>
-                  )
-                )}
-              </div>
+                  )}
+
+                </div>
+              )}
+
             </div>
           );
         })}
+
       </div>
     </div>
   );

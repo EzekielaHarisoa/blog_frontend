@@ -1,26 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useAuthStore from "../store/authstore";
-import { followUserApi, isFollowingApi, unfollowUserApi } from "../api/follow.api";
-import { useEffect } from "react";
+import {
+  followUserApi,
+  isFollowingApi,
+  unfollowUserApi,
+} from "../api/follow.api";
 
-export default function FollowCard({ targetUserId, isFollowing = false,onFollowChange }) {
+export default function FollowCard({ targetUserId, onFollowChange }) {
   const token = useAuthStore((state) => state.token);
 
   const [loading, setLoading] = useState(false);
-  const [followed, setFollowed] = useState(isFollowing);
-  useEffect(() => {
-     if (!targetUserId) return;
-      checkIfFollowing();
-  }, [targetUserId]);
+  const [followed, setFollowed] = useState(false);
 
-  
+  // CHECK FOLLOW STATUS
+  useEffect(() => {
+    if (!targetUserId || !token) return;
+    checkIfFollowing();
+  }, [targetUserId, token]);
+
+  async function checkIfFollowing() {
+    try {
+      const data = await isFollowingApi(targetUserId);
+      setFollowed(!!data.following);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // FOLLOW
   async function handleFollow() {
+    if (loading) return;
+
     try {
       setLoading(true);
 
       await followUserApi(targetUserId);
+
       setFollowed(true);
-      onFollowChange?.()
+
+      // refresh parent 
+      onFollowChange?.();
     } catch (err) {
       console.error(err);
     } finally {
@@ -28,47 +47,44 @@ export default function FollowCard({ targetUserId, isFollowing = false,onFollowC
     }
   }
 
+  // UNFOLLOW
   async function handleUnfollow() {
+    if (loading) return;
+
     try {
       setLoading(true);
 
       await unfollowUserApi(targetUserId);
-      setFollowed(false);
-      onFollowChange?.();
 
+      setFollowed(false);
+
+      onFollowChange?.();
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   }
-  async function checkIfFollowing() {
-    try {
-      const data = await isFollowingApi(targetUserId);
-      console.log(data);
-      setFollowed(data.following);    } catch (error) {
-      console.error("Error checking follow status:", error);
-    }
-  }
+
   return (
-    <div className="flex items-center gap-2 p-4 border rounded">
-      {followed ? (
-        <button
-          disabled={loading}
-          onClick={handleUnfollow}
-          className="px-3 py-1 border rounded"
-        >
-          Unfollow
-        </button>
-      ) : (
-        <button
-          disabled={loading}
-          onClick={handleFollow}
-          className="px-3 py-1 bg-black text-white rounded"
-        >
-          Follow
-        </button>
-      )}
-    </div>
+    <button
+      onClick={followed ? handleUnfollow : handleFollow}
+      disabled={loading}
+      className={`
+        px-4 py-1.5 rounded-full text-sm font-medium transition
+        ${
+          followed
+            ? "bg-slate-800 text-white hover:bg-slate-700"
+            : "bg-white text-black border border-slate-300 hover:bg-slate-100"
+        }
+        disabled:opacity-50 disabled:cursor-not-allowed
+      `}
+    >
+      {loading
+        ? "..."
+        : followed
+        ? "Following"
+        : "Follow"}
+    </button>
   );
 }

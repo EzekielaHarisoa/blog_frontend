@@ -1,242 +1,134 @@
 import { useEffect, useState } from "react";
-import { getProfile, editProfile, uploadAvatar } from "../api/user.api";
+import { useParams } from "react-router-dom";
 import useAuthStore from "../store/authstore";
+
 import PostCard from "../components/PostCard";
+import FollowCard from "../components/FollowCard";
+
+import { getProfileUser } from "../api/user.api";
 import { getPostByUser } from "../api/post.api";
+import { getFollowersCount, getFollowingCount } from "../api/follow.api";
+
 export default function Profile() {
+  const { id } = useParams();
+  const currentUser = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
-  const setUser = useAuthStore((state) => state.setUser);
+
+  const profileId = id || currentUser?.id;
+  const isMyProfile = !id || Number(id) === Number(currentUser?.id);
 
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const [editMode, setEditMode] = useState(false);
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
-
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [saving, setSaving] = useState(false);
   const [posts, setPosts] = useState([]);
-  const user = useAuthStore((state) => state.user);
-  const userId = user?.id;
+  const [followers, setFollowers] = useState(0);
+  const [following, setFollowing] = useState(0);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    loadProfile();
-    loadPosts();
-  }, []);
-// load profil 
-  async function loadPosts() {
-   
-    try {
-      const data = await getPostByUser(userId);
-      setPosts(data || []);
-    } catch (error) {
-      console.error("Erreur chargement posts :", error);
-      setPosts([]);
-    }
-  
-  }
-    async function loadProfile() {
+    if (!profileId) return;
+    loadAll();
+  }, [profileId]);
+
+  async function loadAll() {
     try {
       setLoading(true);
-      setError("");
 
-      const data = await getProfile(token);
+      const [p, postsData, f1, f2] = await Promise.all([
+        getProfileUser(profileId, token),
+        getPostByUser(profileId),
+        getFollowersCount(profileId),
+        getFollowingCount(profileId),
+      ]);
 
-      setProfile(data);
-      setName(data.name || "");
-      setBio(data.bio || "");
-
+      setProfile(p);
+      setPosts(postsData || []);
+      setFollowers(f1.followers || 0);
+      setFollowing(f2.following || 0);
     } catch (err) {
       console.error(err);
-      setError("Erreur chargement profil");
     } finally {
       setLoading(false);
     }
   }
 
-  function handleCancel() {
-    setName(profile?.name || "");
-    setBio(profile?.bio || "");
-    setAvatarFile(null);
-    setEditMode(false);
-  }
-
-  async function handleSave() {
-    try {
-      setSaving(true);
-      setError("");
-
-      
-      await editProfile({ name, bio }, token);
-
-     
-      if (avatarFile) {
-        const formData = new FormData();
-        formData.append("avatar", avatarFile);
-
-        const updatedUser = await uploadAvatar(formData, token);
-
-        setProfile(updatedUser);
-        setUser(updatedUser);
-      } else {
-        // reload simple profil
-        const fresh = await getProfile(token);
-        setProfile(fresh);
-        setUser(fresh);
-      }
-
-      setEditMode(false);
-      setAvatarFile(null);
-
-    } catch (err) {
-      console.error(err);
-      setError("Erreur sauvegarde profil");
-    } finally {
-      setSaving(false);
-    }
-  }
-
   if (loading) {
     return (
-      <p className="text-center text-sm text-gray-500">
+      <div className="text-center text-slate-400 mt-10">
         Chargement...
-      </p>
+      </div>
     );
   }
 
-  if (error) {
+  if (!profile) {
     return (
-      <p className="text-center text-red-500">
-        {error}
-      </p>
+      <div className="text-center text-red-400 mt-10">
+        Profil introuvable
+      </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white border rounded-2xl p-6 shadow-sm">
+    <div className="max-w-3xl mx-auto text-slate-100">
 
-        {/* HEADER */}
-        <div className="flex items-center gap-4">
+      {/* COVER */}
+      <div className="h-32 bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 rounded-t-2xl" />
 
-          {/* AVATAR */}
-          <div className="relative w-20 h-20">
+      {/* HEADER */}
+      <div className="bg-slate-900 rounded-b-2xl px-6 pb-6 border border-slate-800">
 
-            {profile?.avatar ? (
-             <img
-                src={
-                profile.avatar?.startsWith("http")
-                 ? profile.avatar
-                : `http://localhost:3000${profile.avatar}`
-                  }
-                 alt="avatar"
-                 className="w-20 h-20 rounded-full object-cover"
-              /> 
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center text-white text-2xl font-bold">
-                {profile?.name?.[0]?.toUpperCase() || "U"}
-              </div>
-            )}
+        {/* AVATAR + ACTION */}
+        <div className="flex justify-between items-end -mt-10">
 
-            {editMode && (
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setAvatarFile(e.target.files[0])}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
-            )}
-          </div>
+          <img
+            src={profile.avatar}
+            className="w-20 h-20 rounded-full border-4 border-slate-900 object-cover"
+          />
 
-          {/* INFOS */}
-          <div className="flex-1">
-
-            {editMode ? (
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="border rounded p-2 text-sm w-full"
-              />
-            ) : (
-              <h1 className="text-2xl font-bold text-gray-800">
-                {profile.name}
-              </h1>
-            )}
-
-            <p className="text-sm text-gray-500">
-              {profile.email}
-            </p>
-
-          </div>
-
-        </div>
-
-        {/* BIO */}
-        <div className="mt-6">
-
-          <h2 className="text-sm font-semibold text-gray-700 mb-1">
-            Bio
-          </h2>
-
-          {editMode ? (
-            <textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              className="border rounded p-2 text-sm w-full"
+          {!isMyProfile && (
+            <FollowCard
+              targetUserId={profileId}
+              onFollowChange={loadAll}
             />
-          ) : (
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">
-              {profile.bio || "Aucune bio"}
-            </p>
           )}
-
         </div>
 
-        {/* DATE */}
-        <div className="mt-6 border-t pt-4">
-          <p className="text-xs text-gray-400">
-            Compte créé le{" "}
-            {new Date(profile.created_at).toLocaleDateString()}
+        {/* INFO */}
+        <div className="mt-3">
+          <h1 className="text-xl font-bold">{profile.name}</h1>
+          <p className="text-sm text-slate-400">
+            {profile.bio || "Aucune bio"}
           </p>
         </div>
 
-        {/* ACTIONS */}
-        <div className="mt-6 flex gap-2">
+        {/* STATS */}
+        <div className="flex gap-6 mt-4 text-sm text-slate-400">
 
-          { editMode ? (
-            <>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="bg-black text-white px-4 py-2 rounded-lg text-sm"
-              >
-                {saving ? "Sauvegarde..." : "Sauvegarder"}
-              </button>
+          <div>
+            <span className="text-white font-bold">{posts.length}</span> Posts
+          </div>
 
-              <button
-                onClick={handleCancel}
-                className="border px-4 py-2 rounded-lg text-sm"
-              >
-                Annuler
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setEditMode(true)}
-              className="bg-black text-white px-4 py-2 rounded-lg text-sm"
-            >
-              Modifier Profil
-            </button>
-          )}
+          <div>
+            <span className="text-white font-bold">{followers}</span> Followers
+          </div>
+
+          <div>
+            <span className="text-white font-bold">{following}</span> Following
+          </div>
 
         </div>
-
       </div>
-     {Array.isArray(posts) &&
-        posts.map((post) => (
-       <PostCard key={post.id} post={post} />
-      ))}
- </div>
+
+      {/* POSTS */}
+      <div className="mt-6 space-y-4">
+        {posts.length === 0 ? (
+          <div className="text-center text-slate-500">
+            Aucun post
+          </div>
+        ) : (
+          posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))
+        )}
+      </div>
+    </div>
   );
 }

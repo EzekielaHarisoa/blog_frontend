@@ -1,33 +1,39 @@
 import { useState } from "react";
-import { useNavigate, Outlet,Link } from "react-router-dom";
+import { useNavigate, Outlet, Link } from "react-router-dom";
 import useAuthStore from "../store/authstore";
+import { PersonStanding } from "lucide-react";
+import { Home } from "lucide-react";
 
 export default function MainLayout() {
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
-  const token  = useAuthStore((state)=>state.token);
-  const user  = useAuthStore((state)=>state.user);
-  const logout = useAuthStore((state)=>state.logout);
+  const [open, setOpen] = useState(false);
+
+  const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   function handleLogout() {
     logout();
-    navigate("/login",{replace:true});
+    setOpen(false);
+    navigate("/login", { replace: true });
   }
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen bg-[#0b0f19] text-white">
 
       {/* HEADER */}
-      <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0b0f19]/90 backdrop-blur">
+
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
 
           {/* LOGO */}
           <h1
-            onClick={() => navigate("/")}
-            className="cursor-pointer text-lg font-semibold"
+            onClick={() => navigate("/posts")}
+            className="cursor-pointer text-xl font-bold"
           >
-            DarkFace
+            OtakuVerse
           </h1>
 
           {/* SEARCH */}
@@ -36,42 +42,122 @@ export default function MainLayout() {
             placeholder="Rechercher..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full max-w-xs rounded-lg border px-3 py-2 outline-none focus:border-black"
+            className="hidden md:block w-64 rounded-lg bg-zinc-900 px-3 py-2 text-sm outline-none border border-white/10 focus:border-violet-500"
           />
 
-          {/* NAV */}
-          <nav className="flex items-center gap-4 text-sm">
+          {/* RIGHT SIDE */}
+          <div className="flex items-center gap-4">
 
-            <Link to ="/posts">Posts </Link>
-            <Link to="/profile"> Profile</Link> 
-            
-            {token && (
+            {/* LINKS */}
+            <Link to="/posts" className="text-sm text-zinc-300 hover:text-white">
+              <Home size={16}/>
+            </Link>
+
+            <Link to="/profile" className="text-sm text-zinc-300 hover:text-white">
+              <PersonStanding/>
+            </Link>
+
+            {/* AVATAR BUTTON */}
+            {user && (
               <button
-                onClick={handleLogout}
-                className="text-red-500"
+                onClick={() => setOpen(true)}
+                className="rounded-full hover:ring-2 hover:ring-violet-500 transition"
               >
-                Logout
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="avatar"
+                    className="h-9 w-9 rounded-full object-cover border border-white/10"
+                  />
+                ) : (
+                  <div className="h-9 w-9 rounded-full bg-violet-600 flex items-center justify-center font-bold">
+                    {user.name?.charAt(0).toUpperCase()}
+                  </div>
+                )}
               </button>
             )}
 
-          </nav>
+          </div>
 
         </div>
       </header>
 
-      {/* MAIN */}
-      <main className="mx-auto max-w-2xl px-6 py-10">
-         {user && <span className="text-xl  font-semibold "> Bienvenue {user.name}</span>} <br /> <br />
-
+      {/* MAIN CONTENT */}
+      <main className="mx-auto max-w-2xl px-4 py-6">
         <Outlet context={{ query }} />
       </main>
 
-      {/* FOOTER */}
-      <footer className="border-t py-8 text-center text-sm text-slate-500">
-        © {new Date().getFullYear()} Mon Blog
-      </footer>
+    
+      {open && (
+        <div className="fixed inset-0 z-50">
 
-     
+          {/* OVERLAY */}
+          <div
+            onClick={() => setOpen(false)}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+
+          {/* PANEL */}
+          <div className="absolute right-0 top-0 h-full w-72 bg-[#0f1424] border-l border-white/10 p-5">
+
+            {/* USER INFO */}
+            <div className="flex items-center gap-3 mb-6">
+
+              {user.avatar ? (
+                <img
+                  src={user.avatar}
+                  className="h-12 w-12 rounded-full object-cover"
+                />
+              ) : (
+                <div className="h-12 w-12 rounded-full bg-violet-600 flex items-center justify-center font-bold">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+              )}
+
+              <div>
+                <p className="font-semibold">{user.name}</p>
+                <p className="text-xs text-zinc-400">Otaku Member</p>
+              </div>
+
+            </div>
+
+            {/* MENU */}
+            <div className="flex flex-col gap-2">
+
+              <button
+                onClick={() => {
+                  navigate("/profile");
+                  setOpen(false);
+                }}
+                className="text-left px-3 py-2 rounded-lg hover:bg-white/5"
+              >
+                👤 Profile
+              </button>
+
+              <button
+                className="text-left px-3 py-2 rounded-lg hover:bg-white/5"
+                onClick={()=>{
+                  navigate("/settings/profile")
+                  setOpen(false)
+
+                }}
+              >
+                ⚙️ Settings
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="text-left px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10"
+              >
+                🚪 Logout
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
     </div>
   );

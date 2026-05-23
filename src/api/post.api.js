@@ -1,3 +1,4 @@
+import axios from "axios";
 
 const BASE_URL = "http://localhost:3000/api/posts";
 
@@ -30,53 +31,51 @@ export async function getPosts(page = 1, limit = 5) {
 
   return response.json();
 }
+
 //get posts by user
 export async function getPostByUser(userId) {
+  if (!userId) throw new Error("userId is required");
+
   const token = getToken();
-  console.log("getPostByUser - userId =", userId);
-  const response = await fetch(
-    `${BASE_URL}/userPost/${userId}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  const status = response.status;
-  console.log("status =", status);
+  if (!token) throw new Error("No token found");
 
-  if (!response.ok) {
-    throw new Error("Erreur API getPostByUser");
-  }
+    const res = await axios.get(
+      `${BASE_URL}/userPost/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  const result = await response.json();
-  return result.data;
+    console.log("API response =", res.data);
+
+    return res.data;
 }
 
 //create post
-export async function createPost(data){
-  const token= getToken();
-  if(!token){
+export async function createPost(data) {
+  const token = getToken();
+
+  if (!token) {
     throw new Error("No token found");
   }
-  const response = await fetch(`${BASE_URL}`,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      Authorization :`Bearer ${token}`
-    },
-    body : JSON.stringify(data)
-    
-  });
 
-  if(!response.ok){
-    throw new Error("Erreur API create");
+  const formData = new FormData();
+  formData.append("title", data.title);
+  formData.append("content", data.content);
+
+  if (data.image) {
+    formData.append("image", data.image);
   }
 
-  const result = await response.json();
-  return result;
+  const res = await axios.post(`${BASE_URL}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+  });
 
+  return res.data;
 }
 //delet post
 export async function deletePost(id) {
