@@ -45,3 +45,58 @@ export async function unfollowUserApi(userId) {
         throw error;
     }
 }
+
+export async function isFollowingApi(userId){
+  try {
+    const token = getToken();
+    const response = await axios.get(
+      `${BASE_URL}/isFollowing/${userId}`,
+      {
+        headers:{
+          Authorization: `Bearer ${token}`,
+        }
+      }
+    )
+    return response.data;
+  } catch (error) {
+    console.error("Is following error:", error);
+    throw error;
+  }
+}
+
+//ce qui me suive
+export async function getFollowersCount(userId){
+  try {
+    const token = getToken();
+    const response = await axios.get(
+      `${BASE_URL}/followers/${userId}`,
+      {
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.log("getFollowers error",error)
+    throw error;
+  }
+}
+//ce que j'ai suivi
+export async function getFollowingCount(userId){
+  try {
+    const token = getToken();
+    const response = await axios.get(
+      `${BASE_URL}/following/${userId}`,
+      {
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.log("getFollowers error",error)
+    throw error;
+  }
+}

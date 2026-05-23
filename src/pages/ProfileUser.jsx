@@ -5,11 +5,14 @@ import useAuthStore from "../store/authstore";
 import { getProfileUser } from "../api/user.api";
 import PostCard from "../components/PostCard";
 import FollowCard from "../components/FollowCard";
+import { getFollowersCount,getFollowingCount } from "../api/follow.api";
 export default function ProfileUser() {
   const { id } = useParams();
 console.log("URL PARAM ID =", id);
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [followers, setFollowers] = useState(0);
+  const [following, setFollowing] = useState(0);
 
   const token = useAuthStore((state) => state.token);
 
@@ -18,12 +21,27 @@ console.log("URL PARAM ID =", id);
 
     loadUser();
     loadPosts();
+    loadCounts();
   }, [id]);
+
+  async function loadCounts () {
+    try {
+      const f1 = await getFollowersCount(id);
+      const f2 = await getFollowingCount(id);
+
+      setFollowers(f1.followers);
+      setFollowing(f2.following)
+    } catch (error) {
+      console.log(error)  
+    }
+  } 
+
 
   async function loadUser() {
     const data = await getProfileUser(id, token);
     setProfile(data);
   }
+
 
   async function loadPosts() {
     const data = await getPostByUser(id);
@@ -49,7 +67,14 @@ console.log("URL PARAM ID =", id);
             <p>{profile.bio}</p>
           </div>
 
-          <FollowCard targetUserId={id} />
+          <FollowCard  
+                 targetUserId={id}
+                 onFollowChange={loadCounts}
+          />
+          <div className="flex gap-4 mt-2 text-sm">
+             <p><b>{followers}</b> Followers</p>
+             <p><b>{following}</b> Following</p>
+          </div>
         </div>
       </div>
 
