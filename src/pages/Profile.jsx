@@ -14,7 +14,7 @@ export default function Profile() {
   const currentUser = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
 
-  const profileId = id || currentUser?.id;
+  const profileId = id ? Number(id) : currentUser?.id; 
   const isMyProfile = !id || Number(id) === Number(currentUser?.id);
 
   const [profile, setProfile] = useState(null);
@@ -24,31 +24,39 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!profileId) return;
-    loadAll();
-  }, [profileId]);
+     if (!token) return;
+     if (!profileId) return;
+
+     loadAll();
+}, [profileId, token]);
 
   async function loadAll() {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const [p, postsData, f1, f2] = await Promise.all([
-        getProfileUser(profileId, token),
-        getPostByUser(profileId),
-        getFollowersCount(profileId),
-        getFollowingCount(profileId),
-      ]);
+    const [profileData, postsData, f1, f2] = await Promise.all([
+      getProfileUser(profileId, token),
+      getPostByUser(profileId, token),
+      getFollowersCount(profileId),
+      getFollowingCount(profileId),
+    ]);
 
-      setProfile(p);
-      setPosts(postsData || []);
-      setFollowers(f1.followers || 0);
-      setFollowing(f2.following || 0);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    console.log("PROFILE DATA =", profileData);
+
+    setProfile(profileData);
+
+    setPosts(Array.isArray(postsData) ? postsData : []);
+
+    setFollowers(f1?.followers || 0);
+    setFollowing(f2?.following || 0);
+
+  } catch (err) {
+    console.error("Profile error:", err);
+    setProfile(null);
+  } finally {
+    setLoading(false);
   }
+}
 
   if (loading) {
     return (
@@ -67,68 +75,95 @@ export default function Profile() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto text-slate-100">
+  <div className="min-h-screen bg-[#0b0f19] text-white">
+
+    {/* container */}
+    <div className="max-w-4xl mx-auto px-4 py-8">
 
       {/* COVER */}
-      <div className="h-32 bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 rounded-t-2xl" />
+      <div className="relative h-40 rounded-2xl overflow-hidden border border-white/10">
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-fuchsia-500 to-cyan-500 opacity-80" />
+        <div className="absolute inset-0 bg-black/20" />
+      </div>
 
-      {/* HEADER */}
-      <div className="bg-slate-900 rounded-b-2xl px-6 pb-6 border border-slate-800">
+      {/* PROFILE CARD */}
+      <div className="relative bg-[#121826] border border-white/10 rounded-2xl px-6 pb-6 -mt-10 shadow-xl">
 
         {/* AVATAR + ACTION */}
-        <div className="flex justify-between items-end -mt-10">
+        <div className="flex justify-between items-end">
 
           <img
-            src={profile.avatar}
-            className="w-20 h-20 rounded-full border-4 border-slate-900 object-cover"
+            src={profile.avatar || "/default-avatar.png"}
+            className="w-24 h-24 rounded-full border-4 border-[#121826] object-cover shadow-lg"
+            alt="avatar"
           />
 
           {!isMyProfile && (
-            <FollowCard
-              targetUserId={profileId}
-              onFollowChange={loadAll}
-            />
+            <div className="mb-2">
+              <FollowCard
+                targetUserId={profileId}
+                onFollowChange={loadAll}
+              />
+            </div>
           )}
         </div>
 
         {/* INFO */}
         <div className="mt-3">
-          <h1 className="text-xl font-bold">{profile.name}</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-2xl font-bold tracking-tight">
+            {profile.name}
+          </h1>
+
+          <p className="text-sm text-gray-400 mt-1 leading-relaxed">
             {profile.bio || "Aucune bio"}
           </p>
         </div>
 
         {/* STATS */}
-        <div className="flex gap-6 mt-4 text-sm text-slate-400">
+        <div className="mt-5 flex gap-6 text-sm">
 
-          <div>
-            <span className="text-white font-bold">{posts.length}</span> Posts
+          <div className="bg-white/5 border border-white/10 px-3 py-2 rounded-lg">
+            <span className="text-white font-bold">{posts.length}</span>
+            <span className="text-gray-400 ml-1">Posts</span>
           </div>
 
-          <div>
-            <span className="text-white font-bold">{followers}</span> Followers
+          <div className="bg-white/5 border border-white/10 px-3 py-2 rounded-lg">
+            <span className="text-white font-bold">{followers}</span>
+            <span className="text-gray-400 ml-1">Followers</span>
           </div>
 
-          <div>
-            <span className="text-white font-bold">{following}</span> Following
+          <div className="bg-white/5 border border-white/10 px-3 py-2 rounded-lg">
+            <span className="text-white font-bold">{following}</span>
+            <span className="text-gray-400 ml-1">Following</span>
           </div>
 
         </div>
       </div>
 
-      {/* POSTS */}
-      <div className="mt-6 space-y-4">
-        {posts.length === 0 ? (
-          <div className="text-center text-slate-500">
-            Aucun post
+      {/* POSTS SECTION */}
+      <div className="mt-8">
+
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Posts</h2>
+          <div className="text-xs text-gray-400">
+            Activité utilisateur
           </div>
-        ) : (
-          posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))
-        )}
+        </div>
+
+        <div className="space-y-4">
+          {posts.length === 0 ? (
+            <div className="text-center text-gray-500 py-10 border border-white/5 rounded-xl bg-white/5">
+              Aucun post
+            </div>
+          ) : (
+            posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))
+          )}
+        </div>
       </div>
+
     </div>
-  );
+  </div>
+);
 }

@@ -1,19 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ── Base ── */
+:root {
+  --o-bg:       #07080f;
+  --o-deep:     #090b14;
+  --o-surface:  #0c0f1a;
+  --o-membrane: #111627;
+  --o-border:   rgba(0, 230, 180, 0.12);
+  --o-coral:    #ff6b6b;
+  --o-biolum:   #00e6b4;
+  --o-jellyf:   #c084fc;
+  --o-algae:    #34d399;
+  --o-abyss:    #0ea5e9;
+  --o-text:     #e2ede9;
+  --o-muted:    #4a6560;
+  --o-font-d:   'Playfair Display', serif;
+  --o-font-b:   'Cormorant Garamond', serif;
+  --o-font-m:   'DM Mono', monospace;
+}
+
 body {
-  font-family: 'Poppins', sans-serif;
-  background: #0b0b15;
+  font-family: var(--o-font-b);
+  background: var(--o-bg);
+  color: var(--o-text);
+  min-height: 100vh;
+  font-size: 16px;
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-}
-
+/* ── Organic scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--o-bg); }
 ::-webkit-scrollbar-thumb {
-  background: #8b5cf6;
+  background: linear-gradient(to bottom, var(--o-biolum), var(--o-jellyf));
   border-radius: 999px;
 }
+
+
+html { scroll-behavior: smooth; }

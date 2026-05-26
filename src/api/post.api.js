@@ -33,11 +33,9 @@ export async function getPosts(page = 1, limit = 5) {
 }
 
 //get posts by user
-export async function getPostByUser(userId) {
+export async function getPostByUser(userId,token) {
   if (!userId) throw new Error("userId is required");
 
-  const token = getToken();
-  if (!token) throw new Error("No token found");
 
     const res = await axios.get(
       `${BASE_URL}/userPost/${userId}`,
@@ -48,32 +46,24 @@ export async function getPostByUser(userId) {
       }
     );
 
-    console.log("API response =", res.data);
+    console.log("API response =", res.data.data);
 
-    return res.data;
+    return res.data.data;
 }
 
 //create post
-export async function createPost(data) {
+export async function createPost(formData) {
   const token = getToken();
 
-  if (!token) {
-    throw new Error("No token found");
-  }
-
-  const formData = new FormData();
-  formData.append("title", data.title);
-  formData.append("content", data.content);
-
-  if (data.image) {
-    formData.append("image", data.image);
-  }
-
-  const res = await axios.post(`${BASE_URL}`, formData, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
-  });
+  const res = await axios.post(
+    BASE_URL,
+    formData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
   return res.data;
 }
@@ -120,11 +110,26 @@ export async function editPost(id, data) {
 
   
 //seach post
-export async function searchPost(query){
-  const response = await fetch(`${BASE_URL}/search?query=${query}`);
-  if (!response.ok) {
-    throw new Error("Erreur API");
-  }
-  return response.json();
+export async function searchPost({
+  query,
+  category = "all",
+  page = 1,
+  limit = 10
+}) {
 
+  const token = getToken();
+
+  const response = await axios.get(`${BASE_URL}/search`, {
+    params: {
+      query,
+      category,
+      page,
+      limit
+    },
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  return response.data;
 }

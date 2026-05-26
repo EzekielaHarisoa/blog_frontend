@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import useAuthStore from "../store/authstore";
 import { editProfile, uploadAvatar } from "../api/user.api";
+import { Camera, User, FileText } from "lucide-react";
 
 export default function SettingsProfile() {
   const user = useAuthStore((state) => state.user);
@@ -43,73 +44,99 @@ export default function SettingsProfile() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-[#0b0f19] text-white flex justify-center px-4 py-10">
+ return (
+  <div className="min-h-screen bg-[#0b0f19] text-white px-4 py-10">
 
-      <div className="w-full max-w-xl">
+    <div className="mx-auto max-w-3xl">
 
-        {/* TITLE */}
-        <h1 className="text-2xl font-bold mb-6">Settings</h1>
+      {/* HEADER */}
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold tracking-tight">
+          Settings
+        </h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Manage your profile and personal information
+        </p>
+      </div>
 
-        {/* CARD */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 space-y-6">
+      {/* TOP PROFILE PREVIEW (NO CARD) */}
+      <div className="flex items-center gap-4 mb-10">
 
-          {/* AVATAR SECTION */}
-          <div className="flex items-center gap-4">
+        <div className="relative">
+          <img
+            src={user?.avatar}
+            className="h-20 w-20 rounded-full object-cover border border-white/10"
+          />
 
-            <img
-              src={user?.avatar}
-              className="h-16 w-16 rounded-full object-cover ring-2 ring-violet-500/40"
-            />
-
-            <label className="text-sm text-violet-300 cursor-pointer hover:text-violet-200">
-              Change avatar
-              <input
-                type="file"
-                onChange={(e) => setAvatar(e.target.files[0])}
-                className="hidden"
-              />
-            </label>
-
-          </div>
-
-          {/* NAME */}
-          <div>
-            <label className="text-sm text-zinc-400">Name</label>
+          <label className="absolute -bottom-1 -right-1 bg-indigo-600 p-2 rounded-full cursor-pointer hover:bg-indigo-500 transition">
+            <Camera size={14} />
             <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2 outline-none focus:border-violet-500"
+              type="file"
+              onChange={(e) => setAvatar(e.target.files[0])}
+              className="hidden"
             />
-          </div>
-
-          {/* BIO */}
-          <div>
-            <label className="text-sm text-zinc-400">Bio</label>
-            <textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              rows={4}
-              className="mt-1 w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2 outline-none focus:border-violet-500"
-            />
-          </div>
-
-          {/* MESSAGE */}
-          {msg && (
-            <p className="text-sm text-green-400">{msg}</p>
-          )}
-
-          {/* BUTTON */}
-          <button
-            onClick={handleSave}
-            disabled={loading}
-            className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 py-2 font-semibold hover:opacity-90 transition"
-          >
-            {loading ? "Saving..." : "Save changes"}
-          </button>
-
+          </label>
         </div>
+
+        <div>
+          <p className="text-lg font-semibold">{user?.name}</p>
+          <p className="text-sm text-gray-400">Edit your personal identity</p>
+        </div>
+
+      </div>
+
+      {/* FORM SECTION (NO CARD STYLE) */}
+      <div className="space-y-8">
+
+        {/* NAME */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-400 flex items-center gap-2">
+            <User size={14} /> Name
+          </label>
+
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full bg-transparent border-b border-white/10 py-2 text-white outline-none focus:border-indigo-500 transition"
+          />
+        </div>
+
+        {/* BIO */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-400 flex items-center gap-2">
+            <FileText size={14} /> Bio
+          </label>
+
+          <textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            rows={4}
+            className="w-full bg-transparent border-b border-white/10 py-2 text-white outline-none focus:border-indigo-500 transition resize-none"
+          />
+        </div>
+
+        {/* MESSAGE */}
+        {msg && (
+          <p
+            className={`text-sm ${
+              msg.includes("Erreur") ? "text-red-400" : "text-green-400"
+            }`}
+          >
+            {msg}
+          </p>
+        )}
+
+        {/* BUTTON (FULL WIDTH BUT CLEAN) */}
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="mt-6 w-full md:w-auto px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 transition font-semibold disabled:opacity-50"
+        >
+          {loading ? "Saving..." : "Save changes"}
+        </button>
+
       </div>
     </div>
-  );
+  </div>
+);
 }

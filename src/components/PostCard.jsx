@@ -82,161 +82,166 @@ export default function PostCard({ post, onEdit, onDelete }) {
     }
   }
 
-  return (
-    <>
-      {/* CARD */}
-      <div className="relative rounded-2xl border border-zinc-800 bg-zinc-900 p-5 text-white shadow-lg hover:shadow-xl transition">
+ return (
+  <>
+    {/* CARD */}
+    <div className="relative rounded-2xl border border-white/10 bg-[#121826] p-5 text-white shadow-md hover:shadow-xl transition">
 
-        {/* HEADER */}
-        <div className="flex items-center gap-3">
+      {/* HEADER */}
+      <div className="flex items-center gap-3">
 
-          <img
-            src={post.avatar || getAvatarUrl(post.avatar)}
-            onClick={() => navigate(`/profile/${post.user_id}`)}
-            className="h-10 w-10 cursor-pointer rounded-full object-cover border border-zinc-700"
-          /> 
-          
+        <img
+          src={post.avatar || getAvatarUrl(post.avatar)}
+          onClick={() => navigate(`/profile/${post.user_id}`)}
+          className="h-10 w-10 cursor-pointer rounded-full object-cover border border-white/10 shadow-sm hover:scale-105 transition"
+        />
 
-          <div>
-            <p className="font-semibold text-sm">{post.author}</p>
-            <p className="text-xs text-zinc-400">
-              {new Date(post.created_at).toLocaleDateString()}
-            </p>
-          </div>
-
-          {/* MENU */}
-          {isOwner && (
-            <div ref={menuRef} className="ml-auto relative">
-
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="p-2 rounded-lg hover:bg-zinc-800"
-              >
-                <MoreVertical size={18} />
-              </button>
-
-              {menuOpen && (
-                <div className="absolute right-0 top-10 w-44 rounded-xl bg-zinc-800 border border-zinc-700 shadow-2xl z-40 overflow-hidden">
-
-                  <button
-                    onClick={() => {
-                      setOpenEdit(true);
-                      setMenuOpen(false);
-                    }}
-                    className="flex items-center gap-2 w-full px-4 py-2 hover:bg-zinc-700 text-sm"
-                  >
-                    <Pencil size={14} /> Modifier
-                  </button>
-
-                  <button
-                    onClick={handleDelete}
-                    className="flex items-center gap-2 w-full px-4 py-2 hover:bg-red-500/20 text-red-400 text-sm"
-                  >
-                    <Trash size={14} /> Supprimer
-                  </button>
-
-                </div>
-              )}
-
-            </div>
-          )}
-
+        <div>
+          <p className="font-medium text-sm">{post.author}</p>
+          <p className="text-xs text-gray-400">
+            {new Date(post.created_at).toLocaleDateString()}
+          </p>
         </div>
 
-        {/* CONTENT */}
-        <h3 className="mt-3 text-lg font-bold">{post.title}</h3>
-        <p className="mt-2 text-sm text-zinc-300 line-clamp-3">
-          {post.content}
-        </p>
-        {imageUrl && (
-         <div className="mt-3 overflow-hidden rounded-xl border border-zinc-800">
-           <img
-               src={imageUrl}
-               alt="post"
-               className="max-h-[400px] w-full object-cover hover:scale-[1.02] transition"
-           />
-         </div>
-         )}
+        {/* MENU */}
+        {isOwner && (
+          <div ref={menuRef} className="ml-auto relative">
 
-        {/* ACTIONS */}
-        <div className="mt-4 flex items-center gap-5 border-t border-zinc-800 pt-3">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="p-2 rounded-lg hover:bg-white/5 transition"
+            >
+              <MoreVertical size={18} />
+            </button>
 
-          <button
-            onClick={handleLike}
-            className="flex items-center gap-2 text-sm text-zinc-300 hover:text-pink-400"
-          >
-            <Heart size={16} className={liked ? "text-pink-500" : ""} />
-            {likeCount}
-          </button>
+            {menuOpen && (
+              <div className="absolute right-0 top-10 w-44 rounded-xl bg-[#0b0f19] border border-white/10 shadow-xl z-40 overflow-hidden">
 
-          <button
-            onClick={() => setShowComments(!showComments)}
-            className="flex items-center gap-2 text-sm text-zinc-300 hover:text-blue-400"
-          >
-            <MessageCircle size={16} />
-            Comments
-          </button>
+                <button
+                  onClick={() => {
+                    setOpenEdit(true);
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2 hover:bg-white/5 text-sm"
+                >
+                  <Pencil size={14} /> Modifier
+                </button>
 
-        </div>
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-2 w-full px-4 py-2 hover:bg-red-500/10 text-red-400 text-sm"
+                >
+                  <Trash size={14} /> Supprimer
+                </button>
 
-        {showComments && (
-          <div className="mt-3 border-t border-zinc-800 pt-3">
-            <Comments postId={post.id} />
+              </div>
+            )}
+
           </div>
         )}
 
       </div>
 
-      {/* MODAL EDIT  */}
-      {openEdit && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      {/* CONTENT */}
+      <h3 className="mt-3 text-lg font-semibold tracking-tight">
+        {post.title}
+      </h3>
 
-          <div className="w-full max-w-md rounded-2xl bg-zinc-900 border border-zinc-700 p-5 shadow-2xl z-[60]">
+      <p className="mt-2 text-sm text-gray-300 leading-relaxed line-clamp-3">
+        {post.content}
+      </p>
 
-            <h2 className="text-lg font-bold mb-4">Modifier post</h2>
+      {/* IMAGE */}
+      {imageUrl && (
+        <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-black">
+          <img
+            src={imageUrl}
+            alt="post"
+            className="max-h-[400px] w-full object-cover hover:scale-[1.02] transition duration-300"
+          />
+        </div>
+      )}
 
-            {error && (
-              <p className="mb-2 text-sm text-red-400">{error}</p>
-            )}
+      {/* ACTIONS */}
+      <div className="mt-4 flex items-center gap-6 border-t border-white/10 pt-3">
 
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full mb-3 p-2 rounded bg-zinc-800 border border-zinc-700"
-              placeholder="Titre"
-            />
+        <button
+          onClick={handleLike}
+          className="flex items-center gap-2 text-sm text-gray-400 hover:text-pink-400 transition"
+        >
+          <Heart size={16} className={liked ? "text-pink-500 fill-pink-500" : ""} />
+          {likeCount}
+        </button>
 
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={4}
-              className="w-full p-2 rounded bg-zinc-800 border border-zinc-700"
-              placeholder="Contenu"
-            />
+        <button
+          onClick={() => setShowComments(!showComments)}
+          className="flex items-center gap-2 text-sm text-gray-400 hover:text-blue-400 transition"
+        >
+          <MessageCircle size={16} />
+          Comments
+        </button>
 
-            <div className="flex justify-end gap-2 mt-4">
+      </div>
 
-              <button
-                onClick={() => setOpenEdit(false)}
-                className="px-3 py-1 rounded bg-zinc-700"
-              >
-                Annuler
-              </button>
+      {/* COMMENTS */}
+      {showComments && (
+        <div className="mt-3 border-t border-white/10 pt-3">
+          <Comments postId={post.id} />
+        </div>
+      )}
 
-              <button
-                onClick={handleSaveEdit}
-                disabled={loading}
-                className="px-3 py-1 rounded bg-pink-600 hover:bg-pink-500"
-              >
-                Save
-              </button>
+    </div>
 
-            </div>
+    {/* MODAL EDIT */}
+    {openEdit && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+
+        <div className="w-full max-w-md rounded-2xl bg-[#121826] border border-white/10 p-5 shadow-2xl">
+
+          <h2 className="text-lg font-semibold mb-4">Modifier post</h2>
+
+          {error && (
+            <p className="mb-2 text-sm text-red-400">{error}</p>
+          )}
+
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full mb-3 p-2 rounded-lg bg-[#0b0f19] border border-white/10 text-white outline-none focus:border-indigo-500"
+            placeholder="Titre"
+          />
+
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={4}
+            className="w-full p-2 rounded-lg bg-[#0b0f19] border border-white/10 text-white outline-none focus:border-indigo-500"
+            placeholder="Contenu"
+          />
+
+          <div className="flex justify-end gap-2 mt-4">
+
+            <button
+              onClick={() => setOpenEdit(false)}
+              className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 transition"
+            >
+              Annuler
+            </button>
+
+            <button
+              onClick={handleSaveEdit}
+              disabled={loading}
+              className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 transition text-white"
+            >
+              Save
+            </button>
 
           </div>
 
         </div>
-      )}
-    </>
-  );
+
+      </div>
+    )}
+  </>
+);
 }

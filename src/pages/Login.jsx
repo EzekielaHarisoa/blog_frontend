@@ -37,40 +37,40 @@ export default function Login() {
   }
 
   return (
-  <div className="flex min-h-screen items-center justify-center bg-[#0b0f19] px-4">
+  <div className="min-h-screen bg-[#0b0f19] text-white flex items-center justify-center px-4 relative overflow-hidden">
 
-    {/* Background glow */}
-    <div className="absolute h-72 w-72 rounded-full bg-violet-600/20 blur-3xl"></div>
-    <div className="absolute right-10 top-10 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl"></div>
+    {/* BACKGROUND GLOW */}
+    <div className="absolute -top-20 -left-20 h-80 w-80 rounded-full bg-violet-600/20 blur-3xl" />
+    <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-cyan-500/20 blur-3xl" />
 
-    <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-xl">
+    {/* MAIN WRAPPER */}
+    <div className="w-full max-w-md">
 
-      {/* TOP */}
-      <div className="mb-8 text-center">
-
-        <h1 className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent">
+      {/* BRAND */}
+      <div className="mb-10 text-center">
+        <h1 className="text-4xl font-black bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
           OtakuVerse
         </h1>
-
-        <p className="mt-2 text-sm text-zinc-400">
-          Connecte-toi à ton univers
+        <p className="text-sm text-zinc-400 mt-2">
+          Welcome back, continue your journey
         </p>
-
       </div>
 
-      {/* ERROR */}
+      {/* ERROR (INLINE STYLE) */}
       {error && (
-        <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+        <div className="mb-5 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          <AlertCircle size={16} />
           {error}
         </div>
       )}
 
-      <form onSubmit={handleLogin} className="space-y-5">
+      {/* FORM */}
+      <form onSubmit={handleLogin} className="space-y-6">
 
         {/* EMAIL */}
-        <div>
-          <label className="mb-2 block text-sm text-zinc-300">
-            Email
+        <div className="space-y-2">
+          <label className="text-xs tracking-wide text-zinc-400 flex items-center gap-2">
+            <Mail size={14} /> Email
           </label>
 
           <input
@@ -78,14 +78,14 @@ export default function Login() {
             placeholder="anime@gmail.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-2xl border border-zinc-700 bg-zinc-900/60 p-3 text-white outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30"
+            className="w-full bg-transparent border-b border-white/10 py-2 text-white outline-none focus:border-violet-500 transition"
           />
         </div>
 
         {/* PASSWORD */}
-        <div>
-          <label className="mb-2 block text-sm text-zinc-300">
-            Mot de passe
+        <div className="space-y-2">
+          <label className="text-xs tracking-wide text-zinc-400 flex items-center gap-2">
+            <Lock size={14} /> Password
           </label>
 
           <input
@@ -93,7 +93,7 @@ export default function Login() {
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-2xl border border-zinc-700 bg-zinc-900/60 p-3 text-white outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+            className="w-full bg-transparent border-b border-white/10 py-2 text-white outline-none focus:border-cyan-500 transition"
           />
         </div>
 
@@ -101,28 +101,27 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-500 p-3 font-semibold text-white transition hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(168,85,247,0.45)] disabled:opacity-50"
+          className="w-full mt-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition py-2 font-semibold disabled:opacity-50"
         >
-          {loading ? "Connexion..." : "Se connecter"}
+          {loading ? "Connecting..." : "Sign in"}
         </button>
 
       </form>
 
       {/* FOOTER */}
-      <div className="mt-6 text-center">
-
-        <p className="text-sm text-zinc-400">
-          Pas encore de compte ?
+      <div className="mt-10 text-center text-sm text-zinc-400">
+        <p>
+          No account yet?
         </p>
 
         <button
           onClick={() => navigate("/register")}
-          className="mt-2 text-sm font-medium text-violet-400 transition hover:text-violet-300"
+          className="mt-2 text-violet-400 hover:text-violet-300 font-medium"
         >
-          Créer un compte
+          Create account
         </button>
-
       </div>
+
     </div>
   </div>
 );

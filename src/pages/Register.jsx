@@ -1,152 +1,115 @@
 import { useState } from "react";
-import { register ,loginApi} from "../api/auth.api";
+import { register, loginApi } from "../api/auth.api";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  //register 
   async function handleRegister(e) {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
 
-  if (!name || !email || !password) {
-    setError("Tous les champs sont obligatoires");
-    return;
+    if (!name || !email || !password) {
+      setError("Tous les champs sont obligatoires");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await register({ name, email, password });
+      const loginRes = await loginApi({ email, password });
+
+      localStorage.setItem("token", loginRes.token);
+
+      window.location.reload();
+    } catch (err) {
+      setError(err.message || "Erreur lors de l'inscription");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  try {
-    setLoading(true);
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#0b0f19] px-4 relative overflow-hidden">
 
-    await register({ name, email, password });
+      {/* subtle background */}
+      <div className="absolute w-[500px] h-[500px] bg-indigo-600/10 blur-[120px] rounded-full -top-40 -left-40" />
+      <div className="absolute w-[500px] h-[500px] bg-cyan-500/10 blur-[120px] rounded-full -bottom-40 -right-40" />
 
-    const loginRes = await loginApi({ email, password });
+      {/* CARD */}
+      <div className="w-full max-w-md bg-[#121826] border border-white/10 rounded-2xl p-8 shadow-xl">
 
-    localStorage.setItem("token", loginRes.token);
-
-    alert("Inscription réussie");
-
-    window.location.reload();
-
-  } catch (err) {
-    setError(err.message || "Erreur lors de l'inscription");
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-}
-
- return (
-  <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0b0f19] px-4">
-
-    {/* BACKGROUND GLOW */}
-    <div className="absolute left-10 top-10 h-72 w-72 rounded-full bg-violet-600/20 blur-3xl"></div>
-    <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl"></div>
-
-    <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-xl">
-
-      {/* HEADER */}
-      <div className="mb-8 text-center">
-
-        <h1 className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent">
-          Join OtakuVerse
-        </h1>
-
-        <p className="mt-2 text-sm text-zinc-400">
-          Crée ton univers otaku
-        </p>
-
-      </div>
-
-      {/* ERROR */}
-      {error && (
-        <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
-          {error}
+        {/* HEADER */}
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-white">
+            Créer un compte
+          </h1>
+          <p className="text-sm text-gray-400 mt-2">
+            Rejoins la plateforme
+          </p>
         </div>
-      )}
 
-      {/* FORM */}
-      <form onSubmit={handleRegister} className="space-y-5">
+        {/* ERROR */}
+        {error && (
+          <div className="mb-4 text-sm text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
+            {error}
+          </div>
+        )}
 
-        {/* NAME */}
-        <div>
-          <label className="mb-2 block text-sm text-zinc-300">
-            Nom
-          </label>
+        {/* FORM */}
+        <form onSubmit={handleRegister} className="space-y-4">
 
           <input
             type="text"
-            placeholder="Naruto Uzumaki"
+            placeholder="Nom complet"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-2xl border border-zinc-700 bg-zinc-900/60 p-3 text-white outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30"
+            className="w-full p-3 rounded-lg bg-[#0b0f19] border border-white/10 text-white outline-none focus:border-indigo-500"
           />
-        </div>
-
-        {/* EMAIL */}
-        <div>
-          <label className="mb-2 block text-sm text-zinc-300">
-            Email
-          </label>
 
           <input
             type="email"
-            placeholder="anime@gmail.com"
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-2xl border border-zinc-700 bg-zinc-900/60 p-3 text-white outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+            className="w-full p-3 rounded-lg bg-[#0b0f19] border border-white/10 text-white outline-none focus:border-indigo-500"
           />
-        </div>
-
-        {/* PASSWORD */}
-        <div>
-          <label className="mb-2 block text-sm text-zinc-300">
-            Mot de passe
-          </label>
 
           <input
             type="password"
-            placeholder="••••••••"
+            placeholder="Mot de passe"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-2xl border border-zinc-700 bg-zinc-900/60 p-3 text-white outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30"
+            className="w-full p-3 rounded-lg bg-[#0b0f19] border border-white/10 text-white outline-none focus:border-indigo-500"
           />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full p-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition disabled:opacity-50"
+          >
+            {loading ? "Création..." : "Créer un compte"}
+          </button>
+
+        </form>
+
+        {/* FOOTER */}
+        <div className="text-center mt-6 text-sm text-gray-400">
+          Déjà un compte ?{" "}
+          <button
+            onClick={() => navigate("/login")}
+            className="text-indigo-400 hover:underline"
+          >
+            Se connecter
+          </button>
         </div>
 
-        {/* BUTTON */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500 p-3 font-semibold text-white transition hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(168,85,247,0.45)] disabled:opacity-50"
-        >
-          {loading ? "Chargement..." : "Créer un compte"}
-        </button>
-
-      </form>
-
-      {/* FOOTER */}
-      <div className="mt-6 text-center">
-
-        <p className="text-sm text-zinc-400">
-          Déjà membre ?
-        </p>
-
-        <button
-          onClick={() => navigate("/login")}
-          className="mt-2 text-sm font-medium text-violet-400 transition hover:text-violet-300"
-        >
-          Se connecter
-        </button>
-
       </div>
-
     </div>
-  </div>
-);
+  );
 }

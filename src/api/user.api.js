@@ -19,8 +19,9 @@ export async function getProfileUser(userId, token){
       Authorization: `Bearer ${token}`,
     },
   }
+  
   );
-
+console.log("URL =", `${BASE_URL}/profile/${userId}`);
   return res.data;
 } 
 

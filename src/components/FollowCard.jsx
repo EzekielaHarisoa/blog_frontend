@@ -66,25 +66,26 @@ export default function FollowCard({ targetUserId, onFollowChange }) {
     }
   }
 
-  return (
-    <button
-      onClick={followed ? handleUnfollow : handleFollow}
-      disabled={loading}
-      className={`
-        px-4 py-1.5 rounded-full text-sm font-medium transition
-        ${
-          followed
-            ? "bg-slate-800 text-white hover:bg-slate-700"
-            : "bg-white text-black border border-slate-300 hover:bg-slate-100"
-        }
-        disabled:opacity-50 disabled:cursor-not-allowed
-      `}
-    >
-      {loading
-        ? "..."
-        : followed
-        ? "Following"
-        : "Follow"}
-    </button>
-  );
+return (
+  <button
+    onClick={followed ? handleUnfollow : handleFollow}
+    disabled={loading}
+    className={`
+      px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200
+      border border-white/10 shadow-sm
+      ${
+        followed
+          ? "bg-white/5 text-white hover:bg-white/10"
+          : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.25)]"
+      }
+      disabled:opacity-50 disabled:cursor-not-allowed active:scale-95
+    `}
+  >
+    {loading
+      ? "..."
+      : followed
+      ? "Following"
+      : "Follow"}
+  </button>
+);
 }
