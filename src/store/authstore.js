@@ -26,11 +26,24 @@ const useAuthStore = create((set)=>({
             }
         );
     },
-    setUser:((user)=>{
-        set(
-            {user}
-        );
-    })
+    setUser: (user) => {
+         localStorage.setItem("user", JSON.stringify(user));
+         set({
+             user,
+         });
+},
+    updateUser: (newData) => {
+        set((state) => {
+        const updated = {
+        ...state.user,
+          ...newData,
+        };
+
+         localStorage.setItem("user", JSON.stringify(updated));
+
+         return { user: updated };
+    });
+    },
 
 }))
 

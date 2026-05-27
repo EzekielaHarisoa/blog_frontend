@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Outlet, Link } from "react-router-dom";
 import useAuthStore from "../store/authstore";
 import {
@@ -14,7 +14,6 @@ import {
 
 export default function MainLayout() {
   const navigate = useNavigate();
-
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -29,9 +28,41 @@ export default function MainLayout() {
     setMobileMenu(false);
     navigate("/login", { replace: true });
   }
+ const images = [
+  "/hero1.webp",
+  "/hero2.webp",
+  "/hero3.webp",
+];
 
+const [index, setIndex] = useState(0);
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setIndex((prev) => (prev + 1) % images.length);
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, []);
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-white">
+  <div className="relative min-h-screen text-white overflow-hidden">   
+     
+       {/* BACKGROUND SLIDESHOW */}
+      <div className="fixed inset-0 -z-10">
+        {images.map((img, i) => (
+          <img
+            key={i}
+            src={img}
+            className={`
+              absolute inset-0 w-full h-full object-cover
+              transition-opacity duration-10000
+              ${i === index ? "opacity-30" : "opacity-10"}
+            `}
+          />
+        ))}
+
+        {/* DARK OVERLAY */}
+        <div className="absolute inset-0 bg-[#0b0f19]/90" />
+      </div>
 
       {/* HEADER */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0b0f19]/90 backdrop-blur">
@@ -48,10 +79,20 @@ export default function MainLayout() {
             </button>
 
             <h1
-              onClick={() => navigate("/posts")}
-              className="cursor-pointer text-lg font-bold"
-            >
-              OtakuVerse
+               onClick={() => navigate("/posts")}
+               className="
+                        cursor-pointer
+                        text-2xl
+                        font-black
+                        tracking-wide
+                        bg-gradient-to-r
+                      from-violet-400
+                      to-pink-500
+                        bg-clip-text
+                        text-transparent
+                       "
+              >
+                 OTAKUVERSE
             </h1>
           </div>
 
@@ -64,8 +105,7 @@ export default function MainLayout() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Rechercher..."
-                className="w-64 rounded-lg bg-zinc-900 pl-9 pr-3 py-2 text-sm border border-white/10 focus:border-violet-500 outline-none"
-              />
+                className=" w-64 rounded-xl bg-white/5 backdrop-blur-md pl-9 pr-3 py-2 text-sm border border-white/10 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/40 outline-none transition-all"              />
             </div>
 
             <div className="relative">

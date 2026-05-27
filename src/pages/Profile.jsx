@@ -74,28 +74,49 @@ export default function Profile() {
     );
   }
 
-  return (
-  <div className="min-h-screen bg-[#0b0f19] text-white">
+ return (
+  <div className="min-h-screen text-white relative overflow-hidden">
 
-    {/* container */}
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    {/* BACKGROUND GLOW (cohérent app) */}
+    <div className="absolute -top-20 -left-20 h-80 w-80 rounded-full bg-violet-600/20 blur-3xl" />
+    <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-cyan-500/20 blur-3xl" />
+
+    <div className="max-w-4xl mx-auto px-4 py-8 relative z-10">
 
       {/* COVER */}
-      <div className="relative h-40 rounded-2xl overflow-hidden border border-white/10">
+      <div className="relative h-48 rounded-3xl overflow-hidden border border-white/10 shadow-xl">
+
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-fuchsia-500 to-cyan-500 opacity-80" />
-        <div className="absolute inset-0 bg-black/20" />
+        <div className="absolute inset-0 bg-black/30" />
+
+        {/* glow overlay */}
+        <div className="absolute inset-0 backdrop-blur-sm" />
       </div>
 
       {/* PROFILE CARD */}
-      <div className="relative bg-[#121826] border border-white/10 rounded-2xl px-6 pb-6 -mt-10 shadow-xl">
+      <div className="
+        relative -mt-12
+        rounded-3xl
+        border border-white/10
+        bg-white/5
+        backdrop-blur-xl
+        shadow-2xl
+        shadow-black/40
+        px-6 pb-6 pt-6
+      ">
 
         {/* AVATAR + ACTION */}
         <div className="flex justify-between items-end">
 
           <img
             src={profile.avatar || "/default-avatar.png"}
-            className="w-24 h-24 rounded-full border-4 border-[#121826] object-cover shadow-lg"
-            alt="avatar"
+            className="
+              w-28 h-28
+              rounded-full
+              border-4 border-[#0b0f19]
+              object-cover
+              shadow-lg
+            "
           />
 
           {!isMyProfile && (
@@ -109,55 +130,99 @@ export default function Profile() {
         </div>
 
         {/* INFO */}
-        <div className="mt-3">
-          <h1 className="text-2xl font-bold tracking-tight">
+        <div className="mt-4">
+          <h1 className="text-2xl font-black tracking-tight">
             {profile.name}
           </h1>
 
-          <p className="text-sm text-gray-400 mt-1 leading-relaxed">
+          <p className="text-sm text-zinc-400 mt-2 leading-relaxed">
             {profile.bio || "Aucune bio"}
           </p>
         </div>
 
         {/* STATS */}
-        <div className="mt-5 flex gap-6 text-sm">
+        <div className="mt-6 flex flex-wrap gap-3 text-sm">
 
-          <div className="bg-white/5 border border-white/10 px-3 py-2 rounded-lg">
+          <div className="
+            px-4 py-2
+            rounded-xl
+            bg-white/5
+            border border-white/10
+            backdrop-blur-md
+            hover:bg-white/10
+            transition
+          ">
             <span className="text-white font-bold">{posts.length}</span>
-            <span className="text-gray-400 ml-1">Posts</span>
+            <span className="text-zinc-400 ml-1">Posts</span>
           </div>
 
-          <div className="bg-white/5 border border-white/10 px-3 py-2 rounded-lg">
+          <div className="
+            px-4 py-2
+            rounded-xl
+            bg-white/5
+            border border-white/10
+            backdrop-blur-md
+            hover:bg-white/10
+            transition
+          ">
             <span className="text-white font-bold">{followers}</span>
-            <span className="text-gray-400 ml-1">Followers</span>
+            <span className="text-zinc-400 ml-1">Followers</span>
           </div>
 
-          <div className="bg-white/5 border border-white/10 px-3 py-2 rounded-lg">
+          <div className="
+            px-4 py-2
+            rounded-xl
+            bg-white/5
+            border border-white/10
+            backdrop-blur-md
+            hover:bg-white/10
+            transition
+          ">
             <span className="text-white font-bold">{following}</span>
-            <span className="text-gray-400 ml-1">Following</span>
+            <span className="text-zinc-400 ml-1">Following</span>
           </div>
 
         </div>
       </div>
 
-      {/* POSTS SECTION */}
-      <div className="mt-8">
+      {/* POSTS */}
+      <div className="mt-10">
 
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Posts</h2>
-          <div className="text-xs text-gray-400">
+          <h2 className="text-xl font-bold">Posts</h2>
+          <div className="text-xs text-zinc-400">
             Activité utilisateur
           </div>
         </div>
 
         <div className="space-y-4">
           {posts.length === 0 ? (
-            <div className="text-center text-gray-500 py-10 border border-white/5 rounded-xl bg-white/5">
+            <div className="
+              text-center text-zinc-400
+              py-10
+              border border-white/10
+              rounded-2xl
+              bg-white/5
+              backdrop-blur-md
+            ">
               Aucun post
             </div>
           ) : (
             posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <div
+                key={post.id}
+                className="
+                  rounded-2xl
+                  border border-white/10
+                  bg-white/5
+                  backdrop-blur-md
+                  shadow-md
+                  hover:shadow-violet-500/10
+                  transition
+                "
+              >
+                <PostCard post={post} />
+              </div>
             ))
           )}
         </div>

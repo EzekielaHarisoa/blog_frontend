@@ -7,131 +7,181 @@ import PostForm from "../components/PostForm";
 import PostCard from "../components/PostCard";
 
 export default function Posts() {
-
   const { query, category } = useOutletContext();
 
   const [page, setPage] = useState(1);
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   async function loadPosts() {
-
     try {
+      setLoading(true);
 
       let data;
 
-      // RECHERCHE
       if (query.trim()) {
-
         data = await searchPost({
           query,
           category,
           page,
-          limit: 5
+          limit: 5,
         });
-
-      }
-
-      // POSTS NORMAUX
-      else {
-
+      } else {
         data = await getPosts(page, 5);
-
       }
 
       setPosts(data.data);
-
     } catch (error) {
-
       console.log(error);
-
+    } finally {
+      setLoading(false);
     }
-
   }
 
-  // RESET PAGE SI RECHERCHE CHANGE
   useEffect(() => {
-
     setPage(1);
-
   }, [query, category]);
 
-  // LOAD POSTS
   useEffect(() => {
-
     const timer = setTimeout(() => {
-
       loadPosts();
-
     }, 400);
 
     return () => clearTimeout(timer);
-
   }, [query, category, page]);
 
- return (
-  <div className="min-h-screen bg-[#0b0f19] text-white">
+  return (
+  <div className="min-h-screen text-white relative overflow-hidden">
 
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    {/* BACKGROUND GLOW (cohérent avec register/login) */}
+    <div className="absolute -top-20 -left-20 h-80 w-80 rounded-full bg-violet-600/20 blur-3xl" />
+    <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-cyan-500/20 blur-3xl" />
 
-      {/* HEADER FEED */}
-      <div className="mb-6 flex items-center justify-between">
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 relative z-10">
 
-        <h1 className="text-lg font-semibold tracking-tight">
-          Feed
-        </h1>
+      {/* HEADER */}
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight">
+            Feed
+          </h1>
+          <p className="text-sm text-zinc-400">
+            Explore les posts de la communauté
+          </p>
+        </div>
 
-        <span className="text-xs text-gray-400">
-          Réseau social
-        </span>
-
+        <div className="text-xs text-zinc-300 bg-white/5 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
+          OtakuVerse
+        </div>
       </div>
 
       {/* CREATE POST */}
-      <div className="mb-6">
+      <div className="
+        rounded-3xl
+        border border-white/10
+        bg-white/5
+        backdrop-blur-xl
+        p-4
+        shadow-lg
+        shadow-black/30
+      ">
         <PostForm onCreated={loadPosts} />
       </div>
 
+      {/* LOADING */}
+      {loading && (
+        <div className="space-y-3">
+          {[1,2,3].map((i) => (
+            <div
+              key={i}
+              className="h-24 rounded-2xl bg-white/5 animate-pulse border border-white/10"
+            />
+          ))}
+        </div>
+      )}
+
       {/* POSTS */}
-      <div className="space-y-4">
-
-        {posts.map((post) => (
-          <div
-            key={post.id}
-            className="rounded-2xl border border-white/10 bg-[#121826] shadow-md hover:border-white/20 transition"
-          >
-            <PostCard post={post} refresh={loadPosts} />
-          </div>
-        ))}
-
-      </div>
+      {!loading && (
+        <div className="space-y-4">
+          {posts.map((post) => (
+            <div
+              key={post.id}
+              className="
+                rounded-2xl
+                border border-white/10
+                bg-white/5
+                backdrop-blur-md
+                shadow-md
+                hover:shadow-violet-500/10
+                hover:-translate-y-1
+                transition-all duration-300
+              "
+            >
+              <PostCard post={post} refresh={loadPosts} />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* EMPTY STATE */}
-      {posts.length === 0 && (
-        <div className="mt-10 text-center text-gray-500">
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+      {!loading && posts.length === 0 && (
+        <div className="text-center py-10">
+          <div className="
+            inline-block
+            px-6 py-5
+            rounded-2xl
+            border border-white/10
+            bg-white/5
+            backdrop-blur-md
+            text-zinc-400
+          ">
             Aucun post trouvé
           </div>
         </div>
       )}
 
       {/* PAGINATION */}
-      <div className="mt-10 flex items-center justify-center gap-3">
+      <div className="flex items-center justify-center gap-3 pt-4">
 
         <button
           onClick={() => setPage((p) => Math.max(p - 1, 1))}
           disabled={page === 1}
-          className="px-4 py-2 rounded-xl text-sm border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition"
+          className="
+            px-4 py-2
+            rounded-xl
+            text-sm
+            border border-white/10
+            bg-white/5
+            hover:bg-violet-500/10
+            transition
+            disabled:opacity-40
+          "
         >
           Précédent
         </button>
 
-        <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-300">
+        <div className="
+          px-4 py-2
+          rounded-xl
+          bg-white/5
+          border border-white/10
+          text-sm text-zinc-300
+          backdrop-blur-md
+        ">
           Page {page}
         </div>
 
         <button
           onClick={() => setPage((p) => p + 1)}
-          className="px-4 py-2 rounded-xl text-sm border border-white/10 bg-white/5 hover:bg-white/10 transition"
+          className="
+            px-4 py-2
+            rounded-xl
+            text-sm
+            border border-white/10
+            bg-white/5
+            hover:bg-violet-500/10
+            transition
+          "
         >
           Suivant
         </button>
