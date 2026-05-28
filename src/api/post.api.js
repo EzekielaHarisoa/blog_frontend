@@ -111,8 +111,8 @@ export async function editPost(id, data) {
   
 //seach post
 export async function searchPost({
-  query,
-  category = "all",
+  query = "",
+  title = "all",
   page = 1,
   limit = 10
 }) {
@@ -121,8 +121,8 @@ export async function searchPost({
 
   const response = await axios.get(`${BASE_URL}/search`, {
     params: {
-      query,
-      category,
+      query: query.trim(),
+      title,
       page,
       limit
     },

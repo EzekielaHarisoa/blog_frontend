@@ -221,7 +221,7 @@ export default function Profile() {
                   transition
                 "
               >
-                <PostCard post={post} />
+                <PostCard post={post} refresh={loadAll}/>
               </div>
             ))
           )}

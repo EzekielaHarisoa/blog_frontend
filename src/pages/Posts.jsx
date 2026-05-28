@@ -7,7 +7,7 @@ import PostForm from "../components/PostForm";
 import PostCard from "../components/PostCard";
 
 export default function Posts() {
-  const { query, category } = useOutletContext();
+  const { query, title } = useOutletContext();
 
   const [page, setPage] = useState(1);
   const [posts, setPosts] = useState([]);
@@ -19,10 +19,10 @@ export default function Posts() {
 
       let data;
 
-      if (query.trim()) {
+      if (query.trim() || title !== "all") {        
         data = await searchPost({
           query,
-          category,
+          title,
           page,
           limit: 5,
         });
@@ -40,7 +40,7 @@ export default function Posts() {
 
   useEffect(() => {
     setPage(1);
-  }, [query, category]);
+  }, [query, title]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,7 +48,7 @@ export default function Posts() {
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [query, category, page]);
+  }, [query, title, page]);
 
   return (
   <div className="min-h-screen text-white relative overflow-hidden">

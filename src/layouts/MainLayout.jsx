@@ -17,7 +17,7 @@ export default function MainLayout() {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [category, setCategory] = useState("all");
+  const [title, setTitle] = useState("all");
 
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -111,8 +111,8 @@ useEffect(() => {
             <div className="relative">
               <Filter size={16} className="absolute left-3 top-2.5 text-zinc-400" />
               <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 className="rounded-lg bg-zinc-900 pl-9 pr-3 py-2 text-sm border border-white/10"
               >
                 <option value="all">Tous</option>
@@ -146,7 +146,7 @@ useEffect(() => {
 
       {/* MAIN */}
       <main className="mx-auto max-w-2xl px-4 py-6 pb-20 md:pb-6">
-        <Outlet context={{ query, category }} />
+        <Outlet context={{ query, title }} />
       </main>
 
       {/* ================= MOBILE BOTTOM NAV ================= */}

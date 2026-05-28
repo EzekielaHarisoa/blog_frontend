@@ -15,7 +15,7 @@ import useAuthStore from "../store/authstore";
 import { getAvatarUrl } from "../utils/getAvatarUrl";
 import { useNavigate } from "react-router-dom";
 
-export default function PostCard({ post, onEdit, onDelete }) {
+export default function PostCard({ post, onEdit, onDelete, refresh }) {
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -44,8 +44,9 @@ export default function PostCard({ post, onEdit, onDelete }) {
     : null;
 
   useEffect(() => {
+    setLiked(!!post.liked);
+
     setLikeCount(Number(post.likes_count || 0));
-    setLiked(post.liked);
   }, [post]);
 
   useEffect(() => {
