@@ -1,4 +1,5 @@
-const BASE_URL = "http://localhost:3000/api/auth";
+const BASE_URL = "https://api-blog-q81q.onrender.com/api/auth";
+//login
 export async function loginApi(data){
     const response = await fetch(`${BASE_URL}/login`,{
         method:"POST",
@@ -18,6 +19,7 @@ export async function loginApi(data){
     }
     return result;
 }
+//sing
 export async function register(data) {
   const response = await fetch(`${BASE_URL}/register`, {
     method: "POST",

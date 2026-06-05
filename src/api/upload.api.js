@@ -5,8 +5,7 @@ export async function updateAvatar(file, token) {
     formData.append("avatar", file);
 
     const res = await axios.put(
-        "http://localhost:3000/api/users/avatar",
-        formData,
+"https://api-blog-q81q.onrender.com/api/users/avatar",        formData,
         {
             headers: {
                 Authorization: `Bearer ${token}`

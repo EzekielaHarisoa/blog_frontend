@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000/api/posts";
+const BASE_URL = "https://api-blog-q81q.onrender.com/api/posts";
 
 export  function getToken(){
     const token = localStorage.getItem("token");
@@ -65,6 +65,7 @@ export async function createPost(formData) {
     }
   );
 
+  console.log("API response =", res.data);
   return res.data;
 }
 //delet post

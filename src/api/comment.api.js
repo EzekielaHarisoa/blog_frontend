@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000/api/comments";
+const BASE_URL = "https://api-blog-q81q.onrender.com/api/comments";
 //get
 export async function getComments(postId) {
   const res = await fetch(

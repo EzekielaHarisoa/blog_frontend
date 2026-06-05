@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000/api/likes/posts";
+const BASE_URL = "https://api-blog-q81q.onrender.com/api/likes/posts";
 
 export const likePost = async (postId) => {
   const token = localStorage.getItem("token");

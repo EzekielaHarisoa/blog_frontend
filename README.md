@@ -5,8 +5,10 @@
 ## Features
 - Auth JWT
 - Posts CRUD
-- Likes system
+- Likes  system
 - Comments system
+- Profile
+- Search and filter post
 
 ## How to run
 pnpm install

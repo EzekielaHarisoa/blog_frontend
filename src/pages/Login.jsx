@@ -31,11 +31,7 @@ export default function Login() {
       login(data);
       navigate("/posts");
     } catch (err) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Email ou mot de passe incorrect";
-
+      const msg =  "Email ou mot de passe incorrect";
       setError(msg);
     } finally {
       setLoading(false);

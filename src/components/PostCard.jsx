@@ -40,7 +40,7 @@ export default function PostCard({ post, onEdit, onDelete, refresh }) {
   const imageUrl = post.image?.startsWith("http")
     ? post.image
     : post.image
-    ? `http://localhost:3000${post.image}`
+    ? `https://api-blog-q81q.onrender.com${post.image}`
     : null;
 
   useEffect(() => {

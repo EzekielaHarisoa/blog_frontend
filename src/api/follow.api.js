@@ -1,12 +1,12 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000/api/suivi";
+const BASE_URL = "https://api-blog-q81q.onrender.com/api/suivi";
 
 function getToken() {
   const token = localStorage.getItem("token");
   return token;
 }
-
+//follow user
 export async function followUserApi(userId) {
   try {
     const token = getToken();
